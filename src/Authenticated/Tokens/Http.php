@@ -7,6 +7,7 @@ use Innmind\ScalewaySdk\{
     Authenticated\Tokens,
     Token,
     User,
+    Http\Header\AuthToken,
 };
 use Innmind\TimeContinuum\TimeContinuumInterface;
 use Innmind\HttpTransport\Transport;
@@ -15,8 +16,6 @@ use Innmind\Http\{
     Message\Method\Method,
     ProtocolVersion\ProtocolVersion,
     Headers\Headers,
-    Header\Header,
-    Header\Value\Value,
     Header\LinkValue,
 };
 use Innmind\Url\{
@@ -59,10 +58,7 @@ final class Http implements Tokens
                 Method::get(),
                 new ProtocolVersion(2, 0),
                 Headers::of(
-                    new Header(
-                        'X-Auth-Token',
-                        new Value((string) $this->token)
-                    )
+                    new AuthToken($this->token)
                 )
             ));
 
@@ -106,10 +102,7 @@ final class Http implements Tokens
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new Header(
-                    'X-Auth-Token',
-                    new Value((string) $this->token)
-                )
+                new AuthToken($this->token)
             )
         ));
 
@@ -125,10 +118,7 @@ final class Http implements Tokens
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new Header(
-                    'X-Auth-Token',
-                    new Value((string) $this->token)
-                )
+                new AuthToken($this->token)
             )
         ));
     }

@@ -7,6 +7,7 @@ use Innmind\ScalewaySdk\{
     Authenticated\Users,
     Token,
     User,
+    Http\Header\AuthToken,
 };
 use Innmind\TimeContinuum\TimeContinuumInterface;
 use Innmind\HttpTransport\Transport;
@@ -15,8 +16,6 @@ use Innmind\Http\{
     Message\Method\Method,
     ProtocolVersion\ProtocolVersion,
     Headers\Headers,
-    Header\Header,
-    Header\Value\Value,
     Header\ContentType,
     Header\ContentTypeValue,
 };
@@ -51,10 +50,7 @@ final class Http implements Users
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new Header(
-                    'X-Auth-Token',
-                    new Value((string) $this->token)
-                )
+                new AuthToken($this->token)
             )
         ));
 
@@ -85,10 +81,7 @@ final class Http implements Users
             Method::patch(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new Header(
-                    'X-Auth-Token',
-                    new Value((string) $this->token)
-                ),
+                new AuthToken($this->token),
                 new ContentType(
                     new ContentTypeValue('application', 'json')
                 )
