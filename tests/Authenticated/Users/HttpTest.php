@@ -61,7 +61,12 @@ class HttpTest extends TestCase
         "fullname": "John Snow",
         "id": "25d37e4e-9674-450c-a8ac-96ec3be9a643",
         "lastname": "Snow",
-        "organizations": null,
+        "organizations": [
+            {
+                "id": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+                "name": "watev"
+            }
+        ],
         "roles": null,
         "ssh_public_keys": [
             {
@@ -83,6 +88,7 @@ JSON
         $this->assertSame('Snow', $user->lastname());
         $this->assertSame('John Snow', $user->fullname());
         $this->assertCount(1, $user->sshKeys());
+        $this->assertCount(1, $user->organizations());
     }
 
     public function testUpdateSshKeys()

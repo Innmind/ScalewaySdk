@@ -3,9 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\ScalewaySdk;
 
-use Innmind\ScalewaySdk\User\{
-    Id,
-    SshKey,
+use Innmind\ScalewaySdk\{
+    User\Id,
+    User\SshKey,
+    Organization,
 };
 use Innmind\Immutable\SetInterface;
 use function Innmind\Immutable\assertSet;
@@ -18,6 +19,7 @@ final class User
     private $lastname;
     private $fullname;
     private $sshKeys;
+    private $organizations;
 
     public function __construct(
         Id $id,
@@ -25,9 +27,11 @@ final class User
         string $firstname,
         string $lastname,
         string $fullname,
-        SetInterface $sshKeys
+        SetInterface $sshKeys,
+        SetInterface $organizations
     ) {
         assertSet(SshKey::class, $sshKeys, 6);
+        assertSet(Organization\Id::class, $organizations, 7);
 
         $this->id = $id;
         $this->email = $email;
@@ -35,6 +39,7 @@ final class User
         $this->lastname = $lastname;
         $this->fullname = $fullname;
         $this->sshKeys = $sshKeys;
+        $this->organizations = $organizations;
     }
 
     public function id(): Id
@@ -68,5 +73,13 @@ final class User
     public function sshKeys(): SetInterface
     {
         return $this->sshKeys;
+    }
+
+    /**
+     * @return SetInterface<Organization>
+     */
+    public function organizations(): SetInterface
+    {
+        return $this->organizations;
     }
 }

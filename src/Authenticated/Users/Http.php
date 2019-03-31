@@ -7,6 +7,7 @@ use Innmind\ScalewaySdk\{
     Authenticated\Users,
     Token,
     User,
+    Organization,
     Http\Header\AuthToken,
 };
 use Innmind\TimeContinuum\TimeContinuumInterface;
@@ -56,11 +57,18 @@ final class Http implements Users
 
         $user = Json::decode((string) $response->body())['user'];
         $keys = Set::of(User\SshKey::class);
+        $organizations = Set::of(Organization\Id::class);
 
         foreach ($user['ssh_public_keys'] ?? [] as $key) {
             $keys = $keys->add(new User\SshKey(
                 $key['key'],
                 $key['description']
+            ));
+        }
+
+        foreach ($user['organizations'] ?? [] as $organization) {
+            $organizations = $organizations->add(new Organization\Id(
+                $organization['id']
             ));
         }
 
@@ -70,7 +78,8 @@ final class Http implements Users
             $user['firstname'],
             $user['lastname'],
             $user['fullname'],
-            $keys
+            $keys,
+            $organizations
         );
     }
 

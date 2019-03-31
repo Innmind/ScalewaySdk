@@ -7,6 +7,7 @@ use Innmind\ScalewaySdk\{
     User,
     User\Id,
     User\SshKey,
+    Organization,
 };
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
@@ -30,7 +31,8 @@ class UserTest extends TestCase
                     $firstname,
                     $lastname,
                     $fullname,
-                    $keys = Set::of(SshKey::class)
+                    $keys = Set::of(SshKey::class),
+                    $organizations = Set::of(Organization\Id::class)
                 );
 
                 $this->assertSame($id, $user->id());
@@ -39,6 +41,7 @@ class UserTest extends TestCase
                 $this->assertSame($lastname, $user->lastname());
                 $this->assertSame($fullname, $user->fullname());
                 $this->assertSame($keys, $user->sshKeys());
+                $this->assertSame($organizations, $user->organizations());
             });
     }
 }
