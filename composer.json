@@ -20,7 +20,8 @@
         "ramsey/uuid": "^3.8",
         "innmind/http-transport": "^4.0",
         "innmind/json": "^1.1",
-        "innmind/filesystem": "^3.3"
+        "innmind/filesystem": "^3.3",
+        "innmind/immutable": "^2.13"
     },
     "autoload": {
         "psr-4": {
