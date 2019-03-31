@@ -124,4 +124,47 @@ JSON
         $this->assertSame(Token::class, (string) $all->type());
         $this->assertCount(2, $all);
     }
+
+    public function testGet()
+    {
+        $tokens = new Http(
+            $http = $this->createMock(Transport::class),
+            new Earth(new UTC),
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+        );
+        $http
+            ->expects($this->once())
+            ->method('__invoke')
+            ->with($this->callback(static function($request): bool {
+                return (string) $request->url() === 'https://account.scaleway.com/tokens/25d37e4e-9674-450c-a8ac-96ec3be9a643' &&
+                    (string) $request->method() === 'GET' &&
+                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+            }))
+            ->willReturn($response = $this->createMock(Response::class));
+        $response
+            ->expects($this->once())
+            ->method('body')
+            ->willReturn(new StringStream(<<<JSON
+{
+    "token": {
+        "creation_date": "2014-03-13T10:53:11.456319+00:00",
+        "expires": null,
+        "id": "25d37e4e-9674-450c-a8ac-96ec3be9a643",
+        "inherits_user_perms": true,
+        "permissions": [],
+        "roles": {
+            "organization": null,
+            "role": null
+        },
+        "user_id": "8d77785c-abd5-40d0-908f-f13a97e24869"
+    }
+}
+JSON
+            ));
+
+        $token = $tokens->get(new Token\Id('25d37e4e-9674-450c-a8ac-96ec3be9a643'));
+
+        $this->assertInstanceOf(Token::class, $token);
+        $this->assertSame('25d37e4e-9674-450c-a8ac-96ec3be9a643', (string) $token->id());
+    }
 }

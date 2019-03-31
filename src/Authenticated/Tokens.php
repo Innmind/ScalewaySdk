@@ -12,4 +12,5 @@ interface Tokens
      * @return SetInterface<Token>
      */
     public function list(): SetInterface;
+    public function get(Token\Id $id): Token;
 }

@@ -93,14 +93,38 @@ final class Http implements Tokens
         $set = Set::of(Token::class);
 
         foreach ($tokens as $token) {
-            $set = $set->add(new Token(
-                new Token\Id($token['id']),
-                new User\Id($token['user_id']),
-                $this->clock->at($token['creation_date']),
-                \is_string($token['expires']) ? $this->clock->at($token['expires']) : null
-            ));
+            $set = $set->add($this->decode($token));
         }
 
         return $set;
+    }
+
+    public function get(Token\Id $id): Token
+    {
+        $response = ($this->fulfill)(new Request(
+            Url::fromString("https://account.scaleway.com/tokens/$id"),
+            Method::get(),
+            new ProtocolVersion(2, 0),
+            Headers::of(
+                new Header(
+                    'X-Auth-Token',
+                    new Value((string) $this->token)
+                )
+            )
+        ));
+
+        $token = Json::decode((string) $response->body())['token'];
+
+        return $this->decode($token);
+    }
+
+    private function decode(array $token): Token
+    {
+        return new Token(
+            new Token\Id($token['id']),
+            new User\Id($token['user_id']),
+            $this->clock->at($token['creation_date']),
+            \is_string($token['expires']) ? $this->clock->at($token['expires']) : null
+        );
     }
 }
