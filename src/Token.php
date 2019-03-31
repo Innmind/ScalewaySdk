@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\ScalewaySdk;
 
-use Innmind\ScalewaySdk\{
-    Token\Id,
-    User,
-};
+use Innmind\ScalewaySdk\Token\Id;
 use Innmind\TimeContinuum\PointInTimeInterface;
 
 final class Token
