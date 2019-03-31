@@ -167,4 +167,23 @@ JSON
         $this->assertInstanceOf(Token::class, $token);
         $this->assertSame('25d37e4e-9674-450c-a8ac-96ec3be9a643', (string) $token->id());
     }
+
+    public function testRemove()
+    {
+        $tokens = new Http(
+            $http = $this->createMock(Transport::class),
+            new Earth(new UTC),
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+        );
+        $http
+            ->expects($this->once())
+            ->method('__invoke')
+            ->with($this->callback(static function($request): bool {
+                return (string) $request->url() === 'https://account.scaleway.com/tokens/25d37e4e-9674-450c-a8ac-96ec3be9a643' &&
+                    (string) $request->method() === 'DELETE' &&
+                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+            }));
+
+        $this->assertNull($tokens->remove(new Token\Id('25d37e4e-9674-450c-a8ac-96ec3be9a643')));
+    }
 }

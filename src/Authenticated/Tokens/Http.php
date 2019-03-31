@@ -118,6 +118,21 @@ final class Http implements Tokens
         return $this->decode($token);
     }
 
+    public function remove(Token\Id $id): void
+    {
+        ($this->fulfill)(new Request(
+            Url::fromString("https://account.scaleway.com/tokens/$id"),
+            Method::delete(),
+            new ProtocolVersion(2, 0),
+            Headers::of(
+                new Header(
+                    'X-Auth-Token',
+                    new Value((string) $this->token)
+                )
+            )
+        ));
+    }
+
     private function decode(array $token): Token
     {
         return new Token(
