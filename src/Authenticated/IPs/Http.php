@@ -79,7 +79,7 @@ final class Http implements IPs
     /**
      * {@inheritdoc}
      */
-    public function all(): SetInterface
+    public function list(): SetInterface
     {
         $url = Url::fromString("https://cp-{$this->region}.scaleway.com/ips");
         $ips = [];

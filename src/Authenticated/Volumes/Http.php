@@ -81,7 +81,7 @@ final class Http implements Volumes
     /**
      * {@inheritdoc}
      */
-    public function all(): SetInterface
+    public function list(): SetInterface
     {
         $url = Url::fromString("https://cp-{$this->region}.scaleway.com/volumes");
         $volumes = [];
@@ -145,7 +145,7 @@ final class Http implements Volumes
         return $this->decode($volume);
     }
 
-    public function delete(Volume\Id $id): void
+    public function remove(Volume\Id $id): void
     {
         ($this->fulfill)(new Request(
             Url::fromString("https://cp-{$this->region}.scaleway.com/volumes/$id"),

@@ -82,7 +82,7 @@ JSON
         $this->assertFalse($ip->attachedToAServer());
     }
 
-    public function testAll()
+    public function testList()
     {
         $ips = new Http(
             $http = $this->createMock(Transport::class),
@@ -151,7 +151,7 @@ JSON
 JSON
             ));
 
-        $ips = $ips->all();
+        $ips = $ips->list();
 
         $this->assertInstanceOf(SetInterface::class, $ips);
         $this->assertSame(IP::class, (string) $ips->type());

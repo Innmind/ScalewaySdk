@@ -93,7 +93,7 @@ JSON
         $this->assertSame('l_ssd', (string) $volume->type());
     }
 
-    public function testAll()
+    public function testList()
     {
         $volumes = new Http(
             $http = $this->createMock(Transport::class),
@@ -168,7 +168,7 @@ JSON
 JSON
             ));
 
-        $volumes = $volumes->all();
+        $volumes = $volumes->list();
 
         $this->assertInstanceOf(SetInterface::class, $volumes);
         $this->assertSame(Volume::class, (string) $volumes->type());
@@ -222,7 +222,7 @@ JSON
         $this->assertSame('l_ssd', (string) $volume->type());
     }
 
-    public function testDelete()
+    public function testRemove()
     {
         $volumes = new Http(
             $http = $this->createMock(Transport::class),
@@ -238,6 +238,6 @@ JSON
                     (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }));
 
-        $this->assertNull($volumes->delete(new Volume\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd')));
+        $this->assertNull($volumes->remove(new Volume\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd')));
     }
 }
