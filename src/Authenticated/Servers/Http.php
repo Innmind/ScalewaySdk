@@ -52,7 +52,7 @@ final class Http implements Servers
     }
 
     public function create(
-        string $name,
+        Server\Name $name,
         Organization\Id $organization,
         Image\Id $image,
         string ...$tags
@@ -68,7 +68,7 @@ final class Http implements Servers
                 )
             ),
             new StringStream(Json::encode([
-                'name' => $name,
+                'name' => (string) $name,
                 'organization' => (string) $organization,
                 'image' => (string) $image,
                 'tags' => $tags,
@@ -182,7 +182,7 @@ final class Http implements Servers
         return new Server(
             new Server\Id($server['id']),
             new Organization\Id($server['organization']),
-            $server['name'],
+            new Server\Name($server['name']),
             new Image\Id($server['image']['id']),
             new IP\Id($server['public_ip']['id']),
             Server\State::of($server['state']),

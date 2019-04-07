@@ -13,7 +13,7 @@ use Innmind\Immutable\SetInterface;
 interface Servers
 {
     public function create(
-        string $name,
+        Server\Name $name,
         Organization\Id $organization,
         Image\Id $image,
         string ...$tags

@@ -21,7 +21,7 @@ final class Server
     public function __construct(
         Server\Id $id,
         Organization\Id $organization,
-        string $name,
+        Server\Name $name,
         Image\Id $image,
         IP\Id $ip,
         Server\State $state,
@@ -54,7 +54,7 @@ final class Server
         return $this->organization;
     }
 
-    public function name(): string
+    public function name(): Server\Name
     {
         return $this->name;
     }

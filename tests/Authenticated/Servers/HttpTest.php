@@ -110,7 +110,7 @@ JSON
             ));
 
         $server = $servers->create(
-            'foobar',
+            new Server\Name('foobar'),
             new Organization\Id('000a115d-2852-4b0a-9ce8-47f1134ba95a'),
             new Image\Id('9956c6a6-607c-4d42-92bc-5f51f7087ae4'),
             'foo',
@@ -120,7 +120,7 @@ JSON
         $this->assertInstanceOf(Server::class, $server);
         $this->assertSame('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c', (string) $server->id());
         $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $server->organization());
-        $this->assertSame('foobar', $server->name());
+        $this->assertSame('foobar', (string) $server->name());
         $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', (string) $server->image());
         $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', (string) $server->ip());
         $this->assertSame(Server\State::stopped(), $server->state());
@@ -339,7 +339,7 @@ JSON
         $this->assertInstanceOf(Server::class, $server);
         $this->assertSame('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c', (string) $server->id());
         $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $server->organization());
-        $this->assertSame('foobar', $server->name());
+        $this->assertSame('foobar', (string) $server->name());
         $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', (string) $server->image());
         $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', (string) $server->ip());
         $this->assertSame(Server\State::stopped(), $server->state());
