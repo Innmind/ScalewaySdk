@@ -114,6 +114,18 @@ final class Http implements Volumes
         return $this->decode($volume);
     }
 
+    public function delete(Volume\Id $id): void
+    {
+        $response = ($this->fulfill)(new Request(
+            Url::fromString("https://cp-{$this->region}.scaleway.com/volumes/$id"),
+            Method::delete(),
+            new ProtocolVersion(2, 0),
+            Headers::of(
+                new AuthToken($this->token)
+            )
+        ));
+    }
+
     private function decode(array $volume): Volume
     {
         return new Volume(

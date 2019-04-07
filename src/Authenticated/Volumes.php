@@ -23,4 +23,5 @@ interface Volumes
      */
     public function all(): SetInterface;
     public function get(Volume\Id $id): Volume;
+    public function delete(Volume\Id $id): void;
 }
