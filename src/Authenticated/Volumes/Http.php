@@ -98,6 +98,22 @@ final class Http implements Volumes
         return $set;
     }
 
+    public function get(Volume\Id $id): Volume
+    {
+        $response = ($this->fulfill)(new Request(
+            Url::fromString("https://cp-{$this->region}.scaleway.com/volumes/$id"),
+            Method::get(),
+            new ProtocolVersion(2, 0),
+            Headers::of(
+                new AuthToken($this->token)
+            )
+        ));
+
+        $volume = Json::decode((string) $response->body())['volume'];
+
+        return $this->decode($volume);
+    }
+
     private function decode(array $volume): Volume
     {
         return new Volume(

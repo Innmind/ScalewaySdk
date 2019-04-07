@@ -22,4 +22,5 @@ interface Volumes
      * @return SetInterface<Volume>
      */
     public function all(): SetInterface;
+    public function get(Volume\Id $id): Volume;
 }
