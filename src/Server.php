@@ -14,6 +14,7 @@ final class Server
     private $image;
     private $ip;
     private $state;
+    private $allowedActions;
     private $tags;
     private $volumes;
 
@@ -24,11 +25,13 @@ final class Server
         Image\Id $image,
         IP\Id $ip,
         Server\State $state,
+        SetInterface $allowedActions,
         SetInterface $tags,
         SetInterface $volumes
     ) {
-        assertSet('string', $tags, 5);
-        assertSet(Volume\Id::class, $volumes, 6);
+        assertSet(Server\Action::class, $allowedActions, 5);
+        assertSet('string', $tags, 6);
+        assertSet(Volume\Id::class, $volumes, 7);
 
         $this->id = $id;
         $this->organization = $organization;
@@ -36,6 +39,7 @@ final class Server
         $this->image = $image;
         $this->ip = $ip;
         $this->state = $state;
+        $this->allowedActions = $allowedActions;
         $this->tags = $tags;
         $this->volumes = $volumes;
     }
@@ -68,6 +72,14 @@ final class Server
     public function state(): Server\State
     {
         return $this->state;
+    }
+
+    /**
+     * @return SetInterface<Server\Action>
+     */
+    public function allowedActions(): SetInterface
+    {
+        return $this->allowedActions;
     }
 
     /**

@@ -325,7 +325,10 @@ JSON
                 "size": 10000000000,
                 "volume_type": "l_ssd"
             }
-        }
+        },
+        "allowed_actions": [
+            "backup"
+        ]
     }
 }
 JSON
@@ -342,6 +345,10 @@ JSON
         $this->assertSame(Server\State::stopped(), $server->state());
         $this->assertSame(['foo', 'bar'], $server->tags()->toPrimitive());
         $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', (string) $server->volumes()->current());
+        $this->assertSame(
+            [Server\Action::backup()],
+            $server->allowedActions()->toPrimitive()
+        );
     }
 
     public function testRemove()

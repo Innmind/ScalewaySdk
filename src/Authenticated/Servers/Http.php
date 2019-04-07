@@ -168,6 +168,13 @@ final class Http implements Servers
             new Image\Id($server['image']['id']),
             new IP\Id($server['public_ip']['id']),
             Server\State::of($server['state']),
+            \array_reduce(
+                $server['allowed_actions'] ?? [],
+                static function(SetInterface $allowed, string $action): SetInterface {
+                    return $allowed->add(Server\Action::of($action));
+                },
+                Set::of(Server\Action::class)
+            ),
             Set::of('string', ...$server['tags']),
             \array_reduce(
                 $server['volumes'],

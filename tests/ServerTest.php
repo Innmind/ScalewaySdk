@@ -24,6 +24,7 @@ class ServerTest extends TestCase
             $image = new Image\Id('7e0d1343-c2b4-4a72-85a7-7ef6f63a28e7'),
             $ip = new IP\Id('6fb83d24-6a2a-4c76-8304-7b9212b40865'),
             $state = Server\State::running(),
+            $allowedActions = Set::of(Server\Action::class),
             $tags = Set::of('string'),
             $volumes = Set::of(Volume\Id::class)
         );
@@ -34,6 +35,7 @@ class ServerTest extends TestCase
         $this->assertSame($image, $server->image());
         $this->assertSame($ip, $server->ip());
         $this->assertSame($state, $server->state());
+        $this->assertSame($allowedActions, $server->allowedActions());
         $this->assertSame($tags, $server->tags());
         $this->assertSame($volumes, $server->volumes());
     }
