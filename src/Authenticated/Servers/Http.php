@@ -159,6 +159,24 @@ final class Http implements Servers
         ));
     }
 
+    public function execute(Server\Id $id, Server\Action $action): void
+    {
+        ($this->fulfill)(new Request(
+            Url::fromString("https://cp-{$this->region}.scaleway.com/servers/$id"),
+            Method::post(),
+            new ProtocolVersion(2, 0),
+            Headers::of(
+                new AuthToken($this->token),
+                new ContentType(
+                    new ContentTypeValue('application', 'json')
+                )
+            ),
+            new StringStream(Json::encode([
+                'action' => (string) $action,
+            ]))
+        ));
+    }
+
     private function decode(array $server): Server
     {
         return new Server(

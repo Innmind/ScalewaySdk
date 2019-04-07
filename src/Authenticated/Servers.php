@@ -25,4 +25,5 @@ interface Servers
     public function list(): SetInterface;
     public function get(Server\Id $id): Server;
     public function remove(Server\Id $id): void;
+    public function execute(Server\Id $id, Server\Action $action): void;
 }
