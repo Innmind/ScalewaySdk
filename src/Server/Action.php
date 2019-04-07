@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace Innmind\ScalewaySdk\Server;
 
+use Innmind\ScalewaySdk\Exception\DomainException;
+
 final class Action
 {
     private const POWERON = 'poweron';

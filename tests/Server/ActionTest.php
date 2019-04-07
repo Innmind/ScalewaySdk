@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\ScalewaySdk\Server;
 
-use Innmind\ScalewaySdk\Server\Action;
+use Innmind\ScalewaySdk\{
+    Server\Action,
+    Exception\DomainException,
+};
 use PHPUnit\Framework\TestCase;
 
 class ActionTest extends TestCase
@@ -18,6 +21,14 @@ class ActionTest extends TestCase
         $this->assertInstanceOf(Action::class, Action::of($value));
         $this->assertSame($value, (string) Action::of($value));
         $this->assertSame($value, (string) Action::$name());
+    }
+
+    public function testThrowWhenUnknownAction()
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('foo');
+
+        Action::of('foo');
     }
 
     public function actions(): array
