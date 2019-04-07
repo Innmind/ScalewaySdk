@@ -183,7 +183,7 @@ JSON
         $this->assertInstanceOf(Image::class, $image);
         $this->assertSame('1f73d975-35fc-4365-9ead-8dab7e54152f', (string) $image->id());
         $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $image->organization());
-        $this->assertSame('my_image_1', $image->name());
+        $this->assertSame('my_image_1', (string) $image->name());
         $this->assertSame('arm', (string) $image->architecture());
         $this->assertFalse($image->public());
     }

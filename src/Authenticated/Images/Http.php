@@ -117,7 +117,7 @@ final class Http implements Images
         return new Image(
             new Image\Id($image['id']),
             new Organization\Id($image['organization']),
-            $image['name'],
+            new Image\Name($image['name']),
             Image\Architecture::of($image['arch']),
             $image['public']
         );

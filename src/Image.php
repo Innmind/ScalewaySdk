@@ -14,7 +14,7 @@ final class Image
     public function __construct(
         Image\Id $id,
         Organization\Id $organization,
-        string $name,
+        Image\Name $name,
         Image\Architecture $architecture,
         bool $public
     ) {
@@ -35,7 +35,7 @@ final class Image
         return $this->organization;
     }
 
-    public function name(): string
+    public function name(): Image\Name
     {
         return $this->name;
     }
