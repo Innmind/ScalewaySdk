@@ -7,6 +7,7 @@ use Innmind\ScalewaySdk\{
     Volume,
     Organization,
 };
+use Innmind\Immutable\SetInterface;
 
 interface Volumes
 {
@@ -16,4 +17,9 @@ interface Volumes
         Volume\Size $size,
         Volume\Type $type
     ): Volume;
+
+    /**
+     * @return SetInterface<Volume>
+     */
+    public function all(): SetInterface;
 }

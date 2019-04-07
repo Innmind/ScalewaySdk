@@ -24,6 +24,10 @@ use Innmind\Http\{
 use Innmind\Url\Url;
 use Innmind\Json\Json;
 use Innmind\Filesystem\Stream\StringStream;
+use Innmind\Immutable\{
+    SetInterface,
+    Set,
+};
 
 final class Http implements Volumes
 {
@@ -67,6 +71,35 @@ final class Http implements Volumes
 
         $volume = Json::decode((string) $response->body())['volume'];
 
+        return $this->decode($volume);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function all(): SetInterface
+    {
+        $response = ($this->fulfill)(new Request(
+            Url::fromString("https://cp-{$this->region}.scaleway.com/volumes"),
+            Method::get(),
+            new ProtocolVersion(2, 0),
+            Headers::of(
+                new AuthToken($this->token)
+            )
+        ));
+
+        $volumes = Json::decode((string) $response->body())['volumes'];
+        $set = Set::of(Volume::class);
+
+        foreach ($volumes as $volume) {
+            $set = $set->add($this->decode($volume));
+        }
+
+        return $set;
+    }
+
+    private function decode(array $volume): Volume
+    {
         return new Volume(
             new Volume\Id($volume['id']),
             $volume['name'],

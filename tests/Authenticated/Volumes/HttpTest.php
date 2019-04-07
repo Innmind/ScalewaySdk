@@ -18,6 +18,7 @@ use Innmind\Http\{
 };
 use Innmind\Filesystem\Stream\StringStream;
 use Innmind\Json\Json;
+use Innmind\Immutable\SetInterface;
 use PHPUnit\Framework\TestCase;
 
 class HttpTest extends TestCase
@@ -87,5 +88,63 @@ JSON
         $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $volume->organization());
         $this->assertSame(10000000000, $volume->size()->toInt());
         $this->assertSame('l_ssd', (string) $volume->type());
+    }
+
+    public function testAll()
+    {
+        $volumes = new Http(
+            $http = $this->createMock(Transport::class),
+            Region::paris1(),
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+        );
+        $http
+            ->expects($this->once())
+            ->method('__invoke')
+            ->with($this->callback(static function($request): bool {
+                return (string) $request->url() === 'https://cp-par1.scaleway.com/volumes' &&
+                    (string) $request->method() === 'GET' &&
+                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+            }))
+            ->willReturn($response = $this->createMock(Response::class));
+        $response
+            ->expects($this->once())
+            ->method('body')
+            ->willReturn(new StringStream(<<<JSON
+{
+    "volumes": [
+        {
+            "export_uri": null,
+            "id": "f929fe39-63f8-4be8-a80e-1e9c8ae22a76",
+            "name": "volume-0-1",
+            "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+            "server": null,
+            "size": 10000000000,
+            "volume_type": "l_ssd"
+        },
+        {
+            "export_uri": null,
+            "id": "0facb6b5-b117-441a-81c1-f28b1d723779",
+            "name": "volume-0-2",
+            "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+            "server": {
+                "id": "a61434eb-5f70-42d8-9915-45e8aa3201c7",
+                "name": "foobar"
+            },
+            "size": 20000000000,
+            "volume_type": "l_ssd"
+        }
+    ]
+}
+JSON
+            ));
+
+        $volumes = $volumes->all();
+
+        $this->assertInstanceOf(SetInterface::class, $volumes);
+        $this->assertSame(Volume::class, (string) $volumes->type());
+        $this->assertCount(2, $volumes);
+        $this->assertFalse($volumes->current()->attachedToAServer());
+        $volumes->next();
+        $this->assertTrue($volumes->current()->attachedToAServer());
     }
 }
