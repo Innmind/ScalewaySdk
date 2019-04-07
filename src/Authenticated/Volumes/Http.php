@@ -20,8 +20,12 @@ use Innmind\Http\{
     Headers\Headers,
     Header\ContentType,
     Header\ContentTypeValue,
+    Header\LinkValue,
 };
-use Innmind\Url\Url;
+use Innmind\Url\{
+    UrlInterface,
+    Url,
+};
 use Innmind\Json\Json;
 use Innmind\Filesystem\Stream\StringStream;
 use Innmind\Immutable\{
@@ -79,16 +83,43 @@ final class Http implements Volumes
      */
     public function all(): SetInterface
     {
-        $response = ($this->fulfill)(new Request(
-            Url::fromString("https://cp-{$this->region}.scaleway.com/volumes"),
-            Method::get(),
-            new ProtocolVersion(2, 0),
-            Headers::of(
-                new AuthToken($this->token)
-            )
-        ));
+        $url = Url::fromString("https://cp-{$this->region}.scaleway.com/volumes");
+        $volumes = [];
 
-        $volumes = Json::decode((string) $response->body())['volumes'];
+        do {
+            $response = ($this->fulfill)(new Request(
+                $url,
+                Method::get(),
+                new ProtocolVersion(2, 0),
+                Headers::of(
+                    new AuthToken($this->token)
+                )
+            ));
+
+            $volumes = \array_merge(
+                $volumes,
+                Json::decode((string) $response->body())['volumes']
+            );
+            $next = null;
+
+            if ($response->headers()->has('Link')) {
+                $next = $response
+                    ->headers()
+                    ->get('Link')
+                    ->values()
+                    ->filter(static function(LinkValue $link): bool {
+                        return $link->relationship() === 'next';
+                    });
+
+                if ($next->size() === 1) {
+                    $next = $url
+                        ->withPath($next->current()->url()->path())
+                        ->withQuery($next->current()->url()->query());
+                    $url = $next;
+                }
+            }
+        } while ($next instanceof UrlInterface);
+
         $set = Set::of(Volume::class);
 
         foreach ($volumes as $volume) {
