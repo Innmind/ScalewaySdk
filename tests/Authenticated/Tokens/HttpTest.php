@@ -23,15 +23,9 @@ use Innmind\Url\Url;
 use Innmind\Filesystem\Stream\StringStream;
 use Innmind\Immutable\SetInterface;
 use PHPUnit\Framework\TestCase;
-use Eris\{
-    Generator,
-    TestTrait,
-};
 
 class HttpTest extends TestCase
 {
-    use TestTrait;
-
     public function testList()
     {
         $tokens = new Http(
