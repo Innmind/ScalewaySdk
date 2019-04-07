@@ -16,7 +16,10 @@ use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Response,
     Headers\Headers,
+    Header\Link,
+    Header\LinkValue,
 };
+use Innmind\Url\Url;
 use Innmind\Filesystem\Stream\StringStream;
 use Innmind\Json\Json;
 use Innmind\Immutable\SetInterface;
@@ -87,7 +90,7 @@ JSON
             new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
         );
         $http
-            ->expects($this->once())
+            ->expects($this->at(0))
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
                 return (string) $request->url() === 'https://cp-par1.scaleway.com/ips' &&
@@ -95,6 +98,14 @@ JSON
                     (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
+        $response
+            ->expects($this->any())
+            ->method('headers')
+            ->willReturn(Headers::of(
+                new Link(
+                    new LinkValue(Url::fromString('/ips?page=2&per_page=50'), 'next')
+                )
+            ));
         $response
             ->expects($this->once())
             ->method('body')
@@ -106,7 +117,26 @@ JSON
             "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
             "server": null,
             "address": "::1"
-        },
+        }
+    ]
+}
+JSON
+            ));
+        $http
+            ->expects($this->at(1))
+            ->method('__invoke')
+            ->with($this->callback(static function($request): bool {
+                return (string) $request->url() === 'https://cp-par1.scaleway.com/ips?page=2&per_page=50' &&
+                    (string) $request->method() === 'GET' &&
+                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+            }))
+            ->willReturn($response = $this->createMock(Response::class));
+        $response
+            ->expects($this->once())
+            ->method('body')
+            ->willReturn(new StringStream(<<<JSON
+{
+    "ips": [
         {
             "id": "0facb6b5-b117-441a-81c1-f28b1d723779",
             "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",

@@ -20,8 +20,12 @@ use Innmind\Http\{
     Headers\Headers,
     Header\ContentType,
     Header\ContentTypeValue,
+    Header\LinkValue,
 };
-use Innmind\Url\Url;
+use Innmind\Url\{
+    UrlInterface,
+    Url,
+};
 use Innmind\Json\Json;
 use Innmind\Filesystem\Stream\StringStream;
 use Innmind\IP\{
@@ -77,16 +81,43 @@ final class Http implements IPs
      */
     public function all(): SetInterface
     {
-        $response = ($this->fulfill)(new Request(
-            Url::fromString("https://cp-{$this->region}.scaleway.com/ips"),
-            Method::get(),
-            new ProtocolVersion(2, 0),
-            Headers::of(
-                new AuthToken($this->token)
-            )
-        ));
+        $url = Url::fromString("https://cp-{$this->region}.scaleway.com/ips");
+        $ips = [];
 
-        $ips = Json::decode((string) $response->body())['ips'];
+        do {
+            $response = ($this->fulfill)(new Request(
+                $url,
+                Method::get(),
+                new ProtocolVersion(2, 0),
+                Headers::of(
+                    new AuthToken($this->token)
+                )
+            ));
+
+            $ips = \array_merge(
+                $ips,
+                Json::decode((string) $response->body())['ips']
+            );
+            $next = null;
+
+            if ($response->headers()->has('Link')) {
+                $next = $response
+                    ->headers()
+                    ->get('Link')
+                    ->values()
+                    ->filter(static function(LinkValue $link): bool {
+                        return $link->relationship() === 'next';
+                    });
+
+                if ($next->size() === 1) {
+                    $next = $url
+                        ->withPath($next->current()->url()->path())
+                        ->withQuery($next->current()->url()->query());
+                    $url = $next;
+                }
+            }
+        } while ($next instanceof UrlInterface);
+
         $set = Set::of(IP::class);
 
         foreach ($ips as $ip) {
