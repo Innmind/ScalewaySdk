@@ -10,7 +10,6 @@ use Innmind\ScalewaySdk\{
     Organization,
     Http\Header\AuthToken,
 };
-use Innmind\TimeContinuum\TimeContinuumInterface;
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
@@ -31,16 +30,13 @@ use Innmind\Immutable\Set;
 final class Http implements Users
 {
     private $fulfill;
-    private $clock;
     private $token;
 
     public function __construct(
         Transport $fulfill,
-        TimeContinuumInterface $clock,
         Token\Id $token
     ) {
         $this->fulfill = $fulfill;
-        $this->clock = $clock;
         $this->token = $token;
     }
 

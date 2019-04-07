@@ -9,10 +9,6 @@ use Innmind\ScalewaySdk\{
     Token,
     User,
 };
-use Innmind\TimeContinuum\{
-    TimeContinuum\Earth,
-    Timezone\Earth\UTC,
-};
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Response,
@@ -34,7 +30,6 @@ class HttpTest extends TestCase
             Users::class,
             new Http(
                 $this->createMock(Transport::class),
-                new Earth,
                 new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
             )
         );
@@ -44,7 +39,6 @@ class HttpTest extends TestCase
     {
         $users = new Http(
             $http = $this->createMock(Transport::class),
-            new Earth(new UTC),
             new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
         );
         $http
@@ -101,7 +95,6 @@ JSON
     {
         $users = new Http(
             $http = $this->createMock(Transport::class),
-            new Earth(new UTC),
             new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
         );
         $http
