@@ -26,6 +26,18 @@ use PHPUnit\Framework\TestCase;
 
 class HttpTest extends TestCase
 {
+    public function testInterface()
+    {
+        $this->assertInstanceOf(
+            Tokens::class,
+            new Http(
+                $this->createMock(Transport::class),
+                new Earth,
+                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            )
+        );
+    }
+
     public function testList()
     {
         $tokens = new Http(
