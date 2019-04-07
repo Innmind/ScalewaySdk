@@ -9,6 +9,8 @@ final class Type
 {
     private const LSSD = 'l_ssd';
 
+    private static $lssd;
+
     private $value;
 
     private function __construct(string $value)
@@ -28,7 +30,7 @@ final class Type
 
     public static function lssd(): self
     {
-        return new self(self::LSSD);
+        return self::$lssd ?? self::$lssd = new self(self::LSSD);
     }
 
     public function __toString(): string

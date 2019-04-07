@@ -14,6 +14,7 @@ class TypeTest extends TestCase
     public function testLssd()
     {
         $this->assertInstanceOf(Type::class, Type::lssd());
+        $this->assertSame(Type::lssd(), Type::lssd());
         $this->assertSame('l_ssd', (string) Type::lssd());
         $this->assertInstanceOf(Type::class, Type::of('l_ssd'));
         $this->assertSame('l_ssd', (string) Type::of('l_ssd'));
