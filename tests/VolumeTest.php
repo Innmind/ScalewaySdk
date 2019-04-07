@@ -16,7 +16,7 @@ class VolumeTest extends TestCase
     {
         $volume = new Volume(
             $id = new Volume\Id('228f4993-ca23-4c1c-b2eb-aa8a94e093dd'),
-            'foobar',
+            $name = new Volume\Name('foobar'),
             $organization = new Organization\Id('228f4993-ca23-4c1c-b2eb-aa8a94e093dd'),
             $size = Volume\Size::of(42),
             $type = Volume\Type::lssd(),
@@ -24,7 +24,7 @@ class VolumeTest extends TestCase
         );
 
         $this->assertSame($id, $volume->id());
-        $this->assertSame('foobar', $volume->name());
+        $this->assertSame($name, $volume->name());
         $this->assertSame($organization, $volume->organization());
         $this->assertSame($size, $volume->size());
         $this->assertSame($type, $volume->type());
@@ -36,7 +36,7 @@ class VolumeTest extends TestCase
     {
         $volume = new Volume(
             $id = new Volume\Id('228f4993-ca23-4c1c-b2eb-aa8a94e093dd'),
-            'foobar',
+            $name = new Volume\Name('foobar'),
             $organization = new Organization\Id('228f4993-ca23-4c1c-b2eb-aa8a94e093dd'),
             $size = Volume\Size::of(42),
             $type = Volume\Type::lssd(),
@@ -44,7 +44,7 @@ class VolumeTest extends TestCase
         );
 
         $this->assertSame($id, $volume->id());
-        $this->assertSame('foobar', $volume->name());
+        $this->assertSame($name, $volume->name());
         $this->assertSame($organization, $volume->organization());
         $this->assertSame($size, $volume->size());
         $this->assertSame($type, $volume->type());

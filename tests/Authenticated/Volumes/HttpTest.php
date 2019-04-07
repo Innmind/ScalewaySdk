@@ -79,7 +79,7 @@ JSON
             ));
 
         $volume = $volumes->create(
-            'foobar',
+            new Volume\Name('foobar'),
             new Organization\Id('000a115d-2852-4b0a-9ce8-47f1134ba95a'),
             Volume\Size::of(10000000000),
             Volume\Type::lssd()
@@ -87,7 +87,7 @@ JSON
 
         $this->assertInstanceOf(Volume::class, $volume);
         $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $volume->id());
-        $this->assertSame('foobar', $volume->name());
+        $this->assertSame('foobar', (string) $volume->name());
         $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $volume->organization());
         $this->assertSame(10000000000, $volume->size()->toInt());
         $this->assertSame('l_ssd', (string) $volume->type());
@@ -216,7 +216,7 @@ JSON
 
         $this->assertInstanceOf(Volume::class, $volume);
         $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $volume->id());
-        $this->assertSame('foobar', $volume->name());
+        $this->assertSame('foobar', (string) $volume->name());
         $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $volume->organization());
         $this->assertSame(10000000000, $volume->size()->toInt());
         $this->assertSame('l_ssd', (string) $volume->type());

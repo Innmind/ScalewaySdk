@@ -14,7 +14,7 @@ final class Volume
 
     public function __construct(
         Volume\Id $id,
-        string $name,
+        Volume\Name $name,
         Organization\Id $organization,
         Volume\Size $size,
         Volume\Type $type,
@@ -33,7 +33,7 @@ final class Volume
         return $this->id;
     }
 
-    public function name(): string
+    public function name(): Volume\Name
     {
         return $this->name;
     }

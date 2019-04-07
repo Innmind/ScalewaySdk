@@ -50,7 +50,7 @@ final class Http implements Volumes
     }
 
     public function create(
-        string $name,
+        Volume\Name $name,
         Organization\Id $organization,
         Volume\Size $size,
         Volume\Type $type
@@ -66,7 +66,7 @@ final class Http implements Volumes
                 )
             ),
             new StringStream(Json::encode([
-                'name' => $name,
+                'name' => (string) $name,
                 'organization' => (string) $organization,
                 'size' => $size->toInt(),
                 'type' => (string) $type,
@@ -161,7 +161,7 @@ final class Http implements Volumes
     {
         return new Volume(
             new Volume\Id($volume['id']),
-            $volume['name'],
+            new Volume\Name($volume['name']),
             new Organization\Id($volume['organization']),
             Volume\Size::of($volume['size']),
             Volume\Type::of($volume['volume_type']),

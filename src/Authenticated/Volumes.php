@@ -12,7 +12,7 @@ use Innmind\Immutable\SetInterface;
 interface Volumes
 {
     public function create(
-        string $name,
+        Volume\Name $name,
         Organization\Id $organization,
         Volume\Size $size,
         Volume\Type $type
