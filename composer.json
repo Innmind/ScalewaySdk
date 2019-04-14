@@ -1,0 +1,44 @@
+{
+    "name": "innmind/scaleway-sdk",
+    "type": "library",
+    "description": "Unofficial Scaleway SDK",
+    "keywords": ["scaleway", "sdk"],
+    "homepage": "http://github.com/Innmind/ScalewaySdk",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Baptiste Langlade",
+            "email": "langlade.baptiste@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "http://github.com/Innmind/ScalewaySdk/issues"
+    },
+    "require": {
+        "php": "~7.2",
+        "innmind/time-continuum": "^1.3",
+        "ramsey/uuid": "^3.8",
+        "innmind/http-transport": "^4.0",
+        "innmind/json": "^1.1",
+        "innmind/filesystem": "^3.3",
+        "innmind/immutable": "^2.13",
+        "innmind/ip": "^1.0",
+        "innmind/url": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Innmind\\ScalewaySdk\\": "src/"
+        },
+        "files": ["src/bootstrap.php"]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Innmind\\ScalewaySdk\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~8.0",
+        "giorgiosironi/eris": "^0.11.0",
+        "innmind/object-graph": "^1.4"
+    }
+}
