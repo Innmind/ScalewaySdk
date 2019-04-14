@@ -7,6 +7,7 @@ use Innmind\ScalewaySdk\{
     Server,
     Organization,
     Image,
+    IP,
 };
 use Innmind\Immutable\SetInterface;
 
@@ -16,6 +17,7 @@ interface Servers
         Server\Name $name,
         Organization\Id $organization,
         Image\Id $image,
+        IP\Id $ip,
         string ...$tags
     ): Server;
 
