@@ -50,8 +50,8 @@ class ChooseImageTest extends TestCase
 
         $chooseImage(
             Region::paris1(),
-            'Debian',
-            'C1'
+            new Marketplace\Image\Name('Debian'),
+            new Marketplace\Product\Server\Name('C1')
         );
     }
 
@@ -63,8 +63,8 @@ class ChooseImageTest extends TestCase
 
         $chooseImage(
             Region::paris1(),
-            'Ubuntu',
-            'C2'
+            new Marketplace\Image\Name('Ubuntu'),
+            new Marketplace\Product\Server\Name('C2')
         );
     }
 
@@ -76,8 +76,8 @@ class ChooseImageTest extends TestCase
 
         $chooseImage(
             Region::amsterdam1(),
-            'Ubuntu',
-            'C1'
+            new Marketplace\Image\Name('Ubuntu'),
+            new Marketplace\Product\Server\Name('C1')
         );
     }
 
@@ -87,8 +87,8 @@ class ChooseImageTest extends TestCase
 
         $this->assertSame($this->expected, $chooseImage(
             Region::paris1(),
-            'Ubuntu',
-            'C1'
+            new Marketplace\Image\Name('Ubuntu'),
+            new Marketplace\Product\Server\Name('C1')
         ));
     }
 }

@@ -23,13 +23,13 @@ final class ChooseImage
 
     public function __invoke(
         Region $region,
-        string $imageName,
-        string $commercialType
+        Marketplace\Image\Name $image,
+        Marketplace\Product\Server\Name $server
     ): Image\Id {
         $ids = $this
             ->images
-            ->filter(static function(Marketplace\Image $image) use ($imageName): bool {
-                return (string) $image->name() === $imageName;
+            ->filter(static function(Marketplace\Image $marketplace) use ($image): bool {
+                return (string) $marketplace->name() === (string) $image;
             })
             ->reduce(
                 Set::of(LocalImage::class),
@@ -39,12 +39,12 @@ final class ChooseImage
                     );
                 }
             )
-            ->filter(static function(LocalImage $localImage) use ($region, $commercialType): bool {
+            ->filter(static function(LocalImage $localImage) use ($region, $server): bool {
                 return $localImage->region() === $region &&
                     $localImage
                         ->compatibleCommercialTypes()
-                        ->filter(static function($type) use ($commercialType): bool {
-                            return (string) $type === $commercialType;
+                        ->filter(static function($type) use ($server): bool {
+                            return (string) $type === (string) $server;
                         })
                         ->size() > 0;
             });
