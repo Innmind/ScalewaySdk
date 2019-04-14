@@ -29,5 +29,6 @@ class HttpTest extends TestCase
         $this->assertInstanceOf(Authenticated\Tokens\Http::class, $authenticated->tokens());
         $this->assertInstanceOf(Authenticated\Users\Http::class, $authenticated->users());
         $this->assertInstanceOf(Authenticated\Volumes\Http::class, $authenticated->volumes(Region::paris1()));
+        $this->assertInstanceOf(Authenticated\Marketplace\Http::class, $authenticated->marketplace());
     }
 }

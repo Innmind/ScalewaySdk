@@ -11,4 +11,5 @@ interface Authenticated
     public function tokens(): Authenticated\Tokens;
     public function users(): Authenticated\Users;
     public function volumes(Region $region): Authenticated\Volumes;
+    public function marketplace(): Authenticated\Marketplace;
 }

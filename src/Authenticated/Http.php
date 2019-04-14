@@ -79,4 +79,13 @@ final class Http implements Authenticated
             $this->token
         );
     }
+
+    public function marketplace(): Marketplace
+    {
+        return new Marketplace\Http(
+            $this->transport,
+            $this->clock,
+            $this->token
+        );
+    }
 }
