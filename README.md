@@ -23,7 +23,8 @@ use Innmind\ScalewaySdk\{
     Tokens\NewToken,
     Region,
     Server,
-    Image,
+    Marketplace,
+    ChooseImage,
 };
 
 $os = Factory::build();
@@ -44,10 +45,21 @@ $organization = $sdk
 $servers = $sdk
     ->authenticated($token->id())
     ->servers(Region::paris1());
+$chooseImage = new ChooseImage(
+    ...$sdk
+        ->authenticated($token->id())
+        ->marketplace()
+        ->images()
+        ->list()
+);
 $server = $servers->create(
     new Server\Name('my-server'),
     $organization,
-    new Image\Id('2e1353f3-02f7-441f-ab68-7218b874e341') // CentOS 7.6 x86_64
+    $chooseImage(
+        Region::paris1(),
+        new Marketplace\Image\Name('CentOS 7.6'),
+        new Marketplace\Product\Server\Name('GP1-XS')
+    )
 );
 $servers->execute(
     $server->id(),
