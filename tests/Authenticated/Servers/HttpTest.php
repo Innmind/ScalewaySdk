@@ -381,7 +381,7 @@ JSON
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/servers/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
+                return (string) $request->url() === 'https://cp-par1.scaleway.com/servers/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd/action' &&
                     (string) $request->method() === 'POST' &&
                     (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
                     (string) $request->body() === '{"action":"poweroff"}';
