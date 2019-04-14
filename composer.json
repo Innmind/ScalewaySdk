@@ -22,7 +22,8 @@
         "innmind/json": "^1.1",
         "innmind/filesystem": "^3.3",
         "innmind/immutable": "^2.13",
-        "innmind/ip": "^1.0"
+        "innmind/ip": "^1.0",
+        "innmind/url": "^2.0"
     },
     "autoload": {
         "psr-4": {
