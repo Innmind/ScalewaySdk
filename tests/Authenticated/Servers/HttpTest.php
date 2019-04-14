@@ -11,6 +11,7 @@ use Innmind\ScalewaySdk\{
     Server,
     Organization,
     Image,
+    IP,
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
@@ -58,6 +59,9 @@ class HttpTest extends TestCase
                         'organization' => '000a115d-2852-4b0a-9ce8-47f1134ba95a',
                         'image' => '9956c6a6-607c-4d42-92bc-5f51f7087ae4',
                         'tags' => ['foo', 'bar'],
+                        'dynamic_ip_required' => false,
+                        'enable_ipv6' => true,
+                        'public_ip' => '95be217a-c32f-41c1-b62d-97827adfc9e5',
                     ]);
             }))
             ->willReturn($response = $this->createMock(Response::class));
@@ -113,6 +117,7 @@ JSON
             new Server\Name('foobar'),
             new Organization\Id('000a115d-2852-4b0a-9ce8-47f1134ba95a'),
             new Image\Id('9956c6a6-607c-4d42-92bc-5f51f7087ae4'),
+            new IP\Id('95be217a-c32f-41c1-b62d-97827adfc9e5'),
             'foo',
             'bar'
         );
@@ -227,7 +232,9 @@ JSON
             "name": "foobar",
             "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
             "private_ip": null,
-            "public_ip": null,
+            "public_ip": {
+                "id": "95be217a-c32f-41c1-b62d-97827adfc9e5"
+            },
             "enable_ipv6": true,
             "state": "stopped",
             "ipv6": null,
@@ -263,8 +270,6 @@ JSON
         $this->assertInstanceOf(SetInterface::class, $servers);
         $this->assertSame(Server::class, (string) $servers->type());
         $this->assertCount(2, $servers);
-        $servers->next();
-        $this->assertFalse($servers->current()->attachedToAnIP());
     }
 
     public function testGet()

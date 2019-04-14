@@ -55,6 +55,7 @@ final class Http implements Servers
         Server\Name $name,
         Organization\Id $organization,
         Image\Id $image,
+        IP\Id $ip,
         string ...$tags
     ): Server {
         $response = ($this->fulfill)(new Request(
@@ -72,6 +73,9 @@ final class Http implements Servers
                 'organization' => (string) $organization,
                 'image' => (string) $image,
                 'tags' => $tags,
+                'dynamic_ip_required' => false,
+                'enable_ipv6' => true,
+                'public_ip' => (string) $ip,
             ]))
         ));
 
@@ -184,7 +188,7 @@ final class Http implements Servers
             new Organization\Id($server['organization']),
             new Server\Name($server['name']),
             new Image\Id($server['image']['id']),
-            \is_array($server['public_ip']) ? new IP\Id($server['public_ip']['id']) : null,
+            new IP\Id($server['public_ip']['id']),
             Server\State::of($server['state']),
             \array_reduce(
                 $server['allowed_actions'] ?? [],

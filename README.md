@@ -59,7 +59,11 @@ $server = $servers->create(
         Region::paris1(),
         new Marketplace\Image\Name('CentOS 7.6'),
         new Marketplace\Product\Server\Name('GP1-XS')
-    )
+    ),
+    $servers
+        ->authenticated($token->id())
+        ->ips(Region::paris1())
+        ->create($organization)
 );
 $servers->execute(
     $server->id(),

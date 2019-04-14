@@ -23,7 +23,7 @@ final class Server
         Organization\Id $organization,
         Server\Name $name,
         Image\Id $image,
-        ?IP\Id $ip,
+        IP\Id $ip,
         Server\State $state,
         SetInterface $allowedActions,
         SetInterface $tags,
@@ -62,11 +62,6 @@ final class Server
     public function image(): Image\Id
     {
         return $this->image;
-    }
-
-    public function attachedToAnIP(): bool
-    {
-        return $this->ip instanceof IP\Id;
     }
 
     public function ip(): IP\Id
