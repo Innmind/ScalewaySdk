@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace Innmind\ScalewaySdk;
 
+use Innmind\ScalewaySdk\Exception\DomainException;
+
 final class Region
 {
     private const PARIS1 = 'par1';
@@ -16,6 +18,19 @@ final class Region
     private function __construct(string $value)
     {
         $this->value = $value;
+    }
+
+    public static function of(string $value): self
+    {
+        switch ($value) {
+            case self::PARIS1:
+                return self::paris1();
+
+            case self::AMSTERDAM1:
+                return self::amsterdam1();
+        }
+
+        throw new DomainException($value);
     }
 
     public static function paris1(): self
