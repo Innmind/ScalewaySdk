@@ -227,7 +227,9 @@ JSON
             "name": "foobar",
             "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
             "private_ip": null,
-            "public_ip": null,
+            "public_ip": {
+                "id": "95be217a-c32f-41c1-b62d-97827adfc9e5"
+            },
             "enable_ipv6": true,
             "state": "stopped",
             "ipv6": null,
@@ -263,8 +265,6 @@ JSON
         $this->assertInstanceOf(SetInterface::class, $servers);
         $this->assertSame(Server::class, (string) $servers->type());
         $this->assertCount(2, $servers);
-        $servers->next();
-        $this->assertFalse($servers->current()->attachedToAnIP());
     }
 
     public function testGet()
