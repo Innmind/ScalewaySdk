@@ -162,7 +162,7 @@ final class Http implements Servers
     public function execute(Server\Id $id, Server\Action $action): void
     {
         ($this->fulfill)(new Request(
-            Url::fromString("https://cp-{$this->region}.scaleway.com/servers/$id"),
+            Url::fromString("https://cp-{$this->region}.scaleway.com/servers/$id/action"),
             Method::post(),
             new ProtocolVersion(2, 0),
             Headers::of(
