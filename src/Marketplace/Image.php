@@ -25,7 +25,7 @@ final class Image
         Organization\Id $organization,
         Image\Version $currentPublicVersion,
         SetInterface $versions,
-        string $name,
+        Image\Name $name,
         SetInterface $categories,
         UrlInterface $logo,
         ?PointInTimeInterface $expiresAt
@@ -66,7 +66,7 @@ final class Image
         return $this->versions;
     }
 
-    public function name(): string
+    public function name(): Image\Name
     {
         return $this->name;
     }

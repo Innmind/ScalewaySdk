@@ -126,7 +126,9 @@ final class Http implements Images
                             new Image\Id($image['id']),
                             Image\Architecture::of($image['arch']),
                             Region::of($image['zone']),
-                            ...$image['compatible_commercial_types']
+                            ...\array_map(static function(string $name) {
+                                return new Marketplace\Product\Server\Name($name);
+                            }, $image['compatible_commercial_types'])
                         );
                     }, $version['local_images'])
                 ));
@@ -144,7 +146,7 @@ final class Http implements Images
             new Organization\Id($image['organization']['id']),
             $currentPublicVersion,
             $versions,
-            $image['name'],
+            new Marketplace\Image\Name($image['name']),
             \array_reduce(
                 $image['categories'],
                 static function(SetInterface $categories, string $category): SetInterface {

@@ -23,7 +23,7 @@ class ImageTest extends TestCase
                 new Image\Version\Id('d24fae12-9b64-4241-b614-03fb643130ef')
             ),
             $versions = Set::of(Image\Version::class, $currentPublicVersion),
-            'foo',
+            $name = new Image\Name('foo'),
             $categories = Set::of(Image\Category::class),
             $logo = $this->createMock(UrlInterface::class),
             $expiresAt = $this->createMock(PointInTimeInterface::class)
@@ -33,7 +33,7 @@ class ImageTest extends TestCase
         $this->assertSame($organization, $image->organization());
         $this->assertSame($currentPublicVersion, $image->currentPublicVersion());
         $this->assertSame($versions, $image->versions());
-        $this->assertSame('foo', $image->name());
+        $this->assertSame($name, $image->name());
         $this->assertSame($categories, $image->categories());
         $this->assertSame($logo, $image->logo());
         $this->assertTrue($image->expires());

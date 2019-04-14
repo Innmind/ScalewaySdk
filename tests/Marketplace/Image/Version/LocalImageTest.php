@@ -5,6 +5,7 @@ namespace Tests\Innmind\ScalewaySdk\Marketplace\Image\Version;
 
 use Innmind\ScalewaySdk\{
     Marketplace\Image\Version\LocalImage,
+    Marketplace\Product\Server\Name,
     Image,
     Region,
 };
@@ -19,15 +20,15 @@ class LocalImageTest extends TestCase
             $id = new Image\Id('eb8f7471-5850-4e4f-886a-220efc09ce3d'),
             $architecture = Image\Architecture::arm(),
             $region = Region::paris1(),
-            'foo',
-            'bar'
+            $foo = new Name('foo'),
+            $bar = new Name('bar')
         );
 
         $this->assertSame($id, $image->id());
         $this->assertSame($architecture, $image->architecture());
         $this->assertSame($region, $image->region());
         $this->assertInstanceOf(SetInterface::class, $image->compatibleCommercialTypes());
-        $this->assertSame('string', (string) $image->compatibleCommercialTypes()->type());
-        $this->assertSame(['foo', 'bar'], $image->compatibleCommercialTypes()->toPrimitive());
+        $this->assertSame(Name::class, (string) $image->compatibleCommercialTypes()->type());
+        $this->assertSame([$foo, $bar], $image->compatibleCommercialTypes()->toPrimitive());
     }
 }

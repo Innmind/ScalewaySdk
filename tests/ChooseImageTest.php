@@ -31,11 +31,11 @@ class ChooseImageTest extends TestCase
                     $this->expected = new Image\Id('9cf52e89-b8bf-43ec-b02a-3de82f3f851c'),
                     Image\Architecture::arm(),
                     Region::paris1(),
-                    'C1'
+                    new Marketplace\Product\Server\Name('C1')
                 )
             ),
             Set::of(Marketplace\Image\Version::class, $currentPublicVersion),
-            'Ubuntu',
+            new Marketplace\Image\Name('Ubuntu'),
             Set::of(Marketplace\Image\Category::class),
             $this->createMock(UrlInterface::class),
             null

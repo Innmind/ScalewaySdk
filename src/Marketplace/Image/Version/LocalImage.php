@@ -6,6 +6,7 @@ namespace Innmind\ScalewaySdk\Marketplace\Image\Version;
 use Innmind\ScalewaySdk\{
     Image,
     Region,
+    Marketplace\Product\Server\Name,
 };
 use Innmind\Immutable\{
     SetInterface,
@@ -23,12 +24,12 @@ final class LocalImage
         Image\Id $id,
         Image\Architecture $architecture,
         Region $region,
-        string ...$compatibleCommercialTypes
+        Name ...$compatibleCommercialTypes
     ) {
         $this->id = $id;
         $this->architecture = $architecture;
         $this->region = $region;
-        $this->compatibleCommercialTypes = Set::of('string', ...$compatibleCommercialTypes);
+        $this->compatibleCommercialTypes = Set::of(Name::class, ...$compatibleCommercialTypes);
     }
 
     public function id(): Image\Id
