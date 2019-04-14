@@ -5,6 +5,12 @@ namespace Innmind\ScalewaySdk;
 
 final class Region
 {
+    private const PARIS1 = 'par1';
+    private const AMSTERDAM1 = 'ams1';
+
+    private static $paris1;
+    private static $amsterdam1;
+
     private $value;
 
     private function __construct(string $value)
@@ -14,12 +20,12 @@ final class Region
 
     public static function paris1(): self
     {
-        return new self('par1');
+        return self::$paris1 ?? self::$paris1 = new self(self::PARIS1);
     }
 
     public static function amsterdam1(): self
     {
-        return new self('ams1');
+        return self::$amsterdam1 ?? self::$amsterdam1 = new self(self::AMSTERDAM1);
     }
 
     public function __toString(): string
