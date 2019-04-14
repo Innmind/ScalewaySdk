@@ -184,7 +184,7 @@ final class Http implements Servers
             new Organization\Id($server['organization']),
             new Server\Name($server['name']),
             new Image\Id($server['image']['id']),
-            new IP\Id($server['public_ip']['id']),
+            \is_array($server['public_ip']) ? new IP\Id($server['public_ip']['id']) : null,
             Server\State::of($server['state']),
             \array_reduce(
                 $server['allowed_actions'] ?? [],

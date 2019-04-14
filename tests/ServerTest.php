@@ -33,6 +33,7 @@ class ServerTest extends TestCase
         $this->assertSame($organization, $server->organization());
         $this->assertSame($name, $server->name());
         $this->assertSame($image, $server->image());
+        $this->assertTrue($server->attachedToAnIP());
         $this->assertSame($ip, $server->ip());
         $this->assertSame($state, $server->state());
         $this->assertSame($allowedActions, $server->allowedActions());
