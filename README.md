@@ -34,7 +34,7 @@ $token = $sdk
     ->create(NewToken::temporary(
         'foo@example.com',
         'some secret password',
-        '2FACOD' // is 2FA enabled on your account
+        '2FACOD' // if 2FA enabled on your account
     ));
 $organization = $sdk
     ->authenticated($token->id())
