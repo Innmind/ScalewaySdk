@@ -13,13 +13,13 @@ use function Innmind\Immutable\assertSet;
 
 final class User
 {
-    private $id;
-    private $email;
-    private $firstname;
-    private $lastname;
-    private $fullname;
-    private $sshKeys;
-    private $organizations;
+    private Id $id;
+    private string $email;
+    private string $firstname;
+    private string $lastname;
+    private string $fullname;
+    private SetInterface $sshKeys;
+    private SetInterface $organizations;
 
     public function __construct(
         Id $id,

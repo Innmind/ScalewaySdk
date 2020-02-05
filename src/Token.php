@@ -8,10 +8,10 @@ use Innmind\TimeContinuum\PointInTimeInterface;
 
 final class Token
 {
-    private $id;
-    private $user;
-    private $expiresAt;
-    private $createdAt;
+    private Id $id;
+    private User\Id $user;
+    private PointInTimeInterface $createdAt;
+    private ?PointInTimeInterface $expiresAt;
 
     public function __construct(
         Id $id,

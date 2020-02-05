@@ -29,8 +29,8 @@ use Innmind\Immutable\Set;
 
 final class Http implements Users
 {
-    private $fulfill;
-    private $token;
+    private Transport $fulfill;
+    private Token\Id $token;
 
     public function __construct(
         Transport $fulfill,

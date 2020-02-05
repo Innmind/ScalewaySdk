@@ -13,13 +13,13 @@ final class State
     private const STOPPED = 'stopped';
     private const STARTING = 'starting';
 
-    private static $running;
-    private static $stopping;
-    private static $stoppedInPlace;
-    private static $stopped;
-    private static $starting;
+    private static ?self $running = null;
+    private static ?self $stopping = null;
+    private static ?self $stoppedInPlace = null;
+    private static ?self $stopped = null;
+    private static ?self $starting = null;
 
-    private $value;
+    private string $value;
 
     private function __construct(string $value)
     {
@@ -50,27 +50,27 @@ final class State
 
     public static function running(): self
     {
-        return self::$running ?? self::$running = new self(self::RUNNING);
+        return self::$running ??= new self(self::RUNNING);
     }
 
     public static function stopping(): self
     {
-        return self::$stopping ?? self::$stopping = new self(self::STOPPING);
+        return self::$stopping ??= new self(self::STOPPING);
     }
 
     public static function stoppedInPlace(): self
     {
-        return self::$stoppedInPlace ?? self::$stoppedInPlace = new self(self::STOPPED_IN_PLACE);
+        return self::$stoppedInPlace ??= new self(self::STOPPED_IN_PLACE);
     }
 
     public static function stopped(): self
     {
-        return self::$stopped ?? self::$stopped = new self(self::STOPPED);
+        return self::$stopped ??= new self(self::STOPPED);
     }
 
     public static function starting(): self
     {
-        return self::$starting ?? self::$starting = new self(self::STARTING);
+        return self::$starting ??= new self(self::STARTING);
     }
 
     public function __toString(): string

@@ -7,7 +7,7 @@ use Innmind\ScalewaySdk\Exception\DomainException;
 
 final class Size
 {
-    private $value;
+    private int $value;
 
     private function __construct(int $value)
     {

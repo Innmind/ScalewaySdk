@@ -14,10 +14,10 @@ use Innmind\TimeContinuum\TimeContinuumInterface;
 
 final class Http implements Scaleway
 {
-    private $transport;
-    private $clock;
-    private $tokens;
-    private $authenticated;
+    private Transport $transport;
+    private TimeContinuumInterface $clock;
+    private ?Tokens $tokens = null;
+    private ?Authenticated $authenticated = null;
 
     public function __construct(
         Transport $transport,
@@ -29,7 +29,7 @@ final class Http implements Scaleway
 
     public function tokens(): Tokens
     {
-        return $this->tokens ?? $this->tokens = new Tokens\Http(
+        return $this->tokens ??= new Tokens\Http(
             $this->transport,
             $this->clock
         );
@@ -37,7 +37,7 @@ final class Http implements Scaleway
 
     public function authenticated(Token\Id $token): Authenticated
     {
-        return $this->authenticated ?? $this->authenticated = new Authenticated\Http(
+        return $this->authenticated ??= new Authenticated\Http(
             $this->transport,
             $this->clock,
             $token

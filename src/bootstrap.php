@@ -13,6 +13,6 @@ function bootstrap(
 ): Scaleway {
     return new Scaleway\Http(
         http()['throw_on_error']($transport),
-        $clock
+        $clock,
     );
 }

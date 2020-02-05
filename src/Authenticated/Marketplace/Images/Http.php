@@ -33,9 +33,9 @@ use Innmind\Immutable\{
 
 final class Http implements Images
 {
-    private $fulfill;
-    private $clock;
-    private $token;
+    private Transport $fulfill;
+    private TimeContinuumInterface $clock;
+    private Token\Id $token;
 
     public function __construct(
         Transport $fulfill,

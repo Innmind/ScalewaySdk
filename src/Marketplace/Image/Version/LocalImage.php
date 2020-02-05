@@ -15,10 +15,10 @@ use Innmind\Immutable\{
 
 final class LocalImage
 {
-    private $id;
-    private $architecture;
-    private $region;
-    private $compatibleCommercialTypes;
+    private Image\Id $id;
+    private Image\Architecture $architecture;
+    private Region $region;
+    private Set $compatibleCommercialTypes;
 
     public function __construct(
         Image\Id $id,

@@ -5,10 +5,10 @@ namespace Innmind\ScalewaySdk\Tokens;
 
 final class NewToken
 {
-    private $email;
-    private $password;
-    private $expires;
-    private $twoFaToken;
+    private string $email;
+    private string $password;
+    private bool $expires;
+    private ?string $twoFaToken;
 
     private function __construct(
         string $email,

@@ -14,7 +14,7 @@ use Innmind\Immutable\{
 
 final class ChooseImage
 {
-    private $images;
+    private Set $images;
 
     public function __construct(Marketplace\Image ...$images)
     {

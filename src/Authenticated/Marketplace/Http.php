@@ -12,10 +12,10 @@ use Innmind\TimeContinuum\TimeContinuumInterface;
 
 final class Http implements Marketplace
 {
-    private $transport;
-    private $clock;
-    private $token;
-    private $images;
+    private Transport $transport;
+    private TimeContinuumInterface $clock;
+    private Token\Id $token;
+    private ?Images $images = null;
 
     public function __construct(
         Transport $transport,
@@ -29,7 +29,7 @@ final class Http implements Marketplace
 
     public function images(): Images
     {
-        return $this->images ?? $this->images = new Images\Http(
+        return $this->images ??= new Images\Http(
             $this->transport,
             $this->clock,
             $this->token

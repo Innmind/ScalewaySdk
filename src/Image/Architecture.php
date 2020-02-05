@@ -11,11 +11,11 @@ final class Architecture
     private const ARM64 = 'arm64';
     private const X86_64 = 'x86_64';
 
-    private static $arm;
-    private static $arm64;
-    private static $x86_64;
+    private static ?self $arm = null;
+    private static ?self $arm64 = null;
+    private static ?self $x86_64 = null;
 
-    private $value;
+    private string $value;
 
     private function __construct(string $value)
     {
@@ -40,17 +40,17 @@ final class Architecture
 
     public static function arm(): self
     {
-        return self::$arm ?? self::$arm = new self(self::ARM);
+        return self::$arm ??= new self(self::ARM);
     }
 
     public static function arm64(): self
     {
-        return self::$arm64 ?? self::$arm64 = new self(self::ARM64);
+        return self::$arm64 ??= new self(self::ARM64);
     }
 
     public static function x86_64(): self
     {
-        return self::$x86_64 ?? self::$x86_64 = new self(self::X86_64);
+        return self::$x86_64 ??= new self(self::X86_64);
     }
 
     public function __toString(): string

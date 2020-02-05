@@ -11,14 +11,14 @@ use function Innmind\Immutable\assertSet;
 
 final class Image
 {
-    private $id;
-    private $organization;
-    private $currentPublicVersion;
-    private $versions;
-    private $name;
-    private $categories;
-    private $logo;
-    private $expiresAt;
+    private Image\Id $id;
+    private Organization\Id $organization;
+    private Image\Version $currentPublicVersion;
+    private SetInterface $versions;
+    private Image\Name $name;
+    private SetInterface $categories;
+    private UrlInterface $logo;
+    private ?PointInTimeInterface $expiresAt;
 
     public function __construct(
         Image\Id $id,

@@ -24,8 +24,8 @@ use Innmind\TimeContinuum\TimeContinuumInterface;
 
 final class Http implements Tokens
 {
-    private $fulfill;
-    private $clock;
+    private Transport $fulfill;
+    private TimeContinuumInterface $clock;
 
     public function __construct(Transport $fulfill, TimeContinuumInterface $clock)
     {

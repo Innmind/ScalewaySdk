@@ -14,14 +14,14 @@ final class Action
     private const TERMINATE = 'terminate';
     private const BACKUP = 'backup';
 
-    private static $powerOn;
-    private static $powerOff;
-    private static $stopInPlace;
-    private static $reboot;
-    private static $terminate;
-    private static $backup;
+    private static ?self $powerOn = null;
+    private static ?self $powerOff = null;
+    private static ?self $stopInPlace = null;
+    private static ?self $reboot = null;
+    private static ?self $terminate = null;
+    private static ?self $backup = null;
 
-    private $value;
+    private string $value;
 
     private function __construct(string $value)
     {
@@ -55,32 +55,32 @@ final class Action
 
     public static function powerOn(): self
     {
-        return self::$powerOn ?? self::$powerOn = new self(self::POWERON);
+        return self::$powerOn ??= new self(self::POWERON);
     }
 
     public static function powerOff(): self
     {
-        return self::$powerOff ?? self::$powerOff = new self(self::POWEROFF);
+        return self::$powerOff ??= new self(self::POWEROFF);
     }
 
     public static function stopInPlace(): self
     {
-        return self::$stopInPlace ?? self::$stopInPlace = new self(self::STOP_IN_PLACE);
+        return self::$stopInPlace ??= new self(self::STOP_IN_PLACE);
     }
 
     public static function reboot(): self
     {
-        return self::$reboot ?? self::$reboot = new self(self::REBOOT);
+        return self::$reboot ??= new self(self::REBOOT);
     }
 
     public static function terminate(): self
     {
-        return self::$terminate ?? self::$terminate = new self(self::TERMINATE);
+        return self::$terminate ??= new self(self::TERMINATE);
     }
 
     public static function backup(): self
     {
-        return self::$backup ?? self::$backup = new self(self::BACKUP);
+        return self::$backup ??= new self(self::BACKUP);
     }
 
     public function __toString(): string

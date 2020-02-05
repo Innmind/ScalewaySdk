@@ -7,10 +7,10 @@ use Innmind\IP\IP as Address;
 
 final class IP
 {
-    private $id;
-    private $address;
-    private $organization;
-    private $server;
+    private IP\Id $id;
+    private Address $address;
+    private Organization\Id $organization;
+    private ?Server\Id $server;
 
     public function __construct(
         IP\Id $id,

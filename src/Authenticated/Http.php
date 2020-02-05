@@ -13,9 +13,9 @@ use Innmind\TimeContinuum\TimeContinuumInterface;
 
 final class Http implements Authenticated
 {
-    private $transport;
-    private $clock;
-    private $token;
+    private Transport $transport;
+    private TimeContinuumInterface $clock;
+    private Token\Id $token;
 
     public function __construct(
         Transport $transport,

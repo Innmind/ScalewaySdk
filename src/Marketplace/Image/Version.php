@@ -10,8 +10,8 @@ use Innmind\Immutable\{
 
 final class Version
 {
-    private $id;
-    private $localImages;
+    private Version\Id $id;
+    private Set $localImages;
 
     public function __construct(Version\Id $id, Version\LocalImage ...$localImages)
     {

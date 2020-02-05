@@ -8,15 +8,15 @@ use function Innmind\Immutable\assertSet;
 
 final class Server
 {
-    private $id;
-    private $organization;
-    private $name;
-    private $image;
-    private $ip;
-    private $state;
-    private $allowedActions;
-    private $tags;
-    private $volumes;
+    private Server\Id $id;
+    private Organization\Id $organization;
+    private Server\Name $name;
+    private Image\Id $image;
+    private IP\Id $ip;
+    private Server\State $state;
+    private SetInterface $allowedActions;
+    private SetInterface $tags;
+    private SetInterface $volumes;
 
     public function __construct(
         Server\Id $id,

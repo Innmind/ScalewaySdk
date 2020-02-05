@@ -31,9 +31,9 @@ use Innmind\Immutable\{
 
 final class Http implements Images
 {
-    private $fulfill;
-    private $region;
-    private $token;
+    private Transport $fulfill;
+    private Region $region;
+    private Token\Id $token;
 
     public function __construct(
         Transport $fulfill,
