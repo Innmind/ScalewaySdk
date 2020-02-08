@@ -11,23 +11,22 @@ use Innmind\ScalewaySdk\{
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
-    Headers\Headers,
+    Message\Method,
+    ProtocolVersion,
+    Headers,
     Header\ContentType,
-    Header\ContentTypeValue,
 };
 use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Filesystem\Stream\StringStream;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\Stream\Readable\Stream;
+use Innmind\TimeContinuum\Clock;
 
 final class Http implements Tokens
 {
     private Transport $fulfill;
-    private TimeContinuumInterface $clock;
+    private Clock $clock;
 
-    public function __construct(Transport $fulfill, TimeContinuumInterface $clock)
+    public function __construct(Transport $fulfill, Clock $clock)
     {
         $this->fulfill = $fulfill;
         $this->clock = $clock;
@@ -46,18 +45,16 @@ final class Http implements Tokens
         }
 
         $response = ($this->fulfill)(new Request(
-            Url::fromString('https://account.scaleway.com/tokens'),
+            Url::of('https://account.scaleway.com/tokens'),
             Method::post(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new ContentType(
-                    new ContentTypeValue('application', 'json')
-                )
+                ContentType::of('application', 'json'),
             ),
-            new StringStream(Json::encode($payload))
+            Stream::ofContent(Json::encode($payload)),
         ));
 
-        $data = Json::decode((string) $response->body())['token'];
+        $data = Json::decode($response->body()->toString())['token'];
 
         return new Token(
             new Token\Id($data['id']),

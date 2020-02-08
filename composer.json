@@ -16,14 +16,14 @@
     },
     "require": {
         "php": "~7.4",
-        "innmind/time-continuum": "^1.3",
+        "innmind/time-continuum": "~2.0",
         "ramsey/uuid": "^3.8",
-        "innmind/http-transport": "^4.0",
+        "innmind/http-transport": "~5.0",
         "innmind/json": "^1.1",
-        "innmind/filesystem": "^3.3",
-        "innmind/immutable": "^2.13",
-        "innmind/ip": "^1.0",
-        "innmind/url": "^2.0"
+        "innmind/filesystem": "~4.0",
+        "innmind/immutable": "~3.3",
+        "innmind/ip": "~2.0",
+        "innmind/url": "~3.0"
     },
     "autoload": {
         "psr-4": {
@@ -39,6 +39,6 @@
     "require-dev": {
         "phpunit/phpunit": "~8.0",
         "giorgiosironi/eris": "^0.11.0",
-        "innmind/object-graph": "^1.4"
+        "innmind/object-graph": "~2.0"
     }
 }

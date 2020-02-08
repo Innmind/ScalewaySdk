@@ -10,14 +10,14 @@ use Innmind\ScalewaySdk\{
     Token,
 };
 use Innmind\HttpTransport\Transport;
-use Innmind\TimeContinuum\{
-    TimeContinuum\Earth,
-    Timezone\Earth\UTC,
+use Innmind\TimeContinuum\Earth\{
+    Clock,
+    Timezone\UTC,
     Format\ISO8601,
 };
 use Innmind\Json\Json;
 use Innmind\Http\Message\Response;
-use Innmind\Filesystem\Stream\StringStream;
+use Innmind\Stream\Readable\Stream;
 use PHPUnit\Framework\TestCase;
 use Eris\{
     Generator,
@@ -34,7 +34,7 @@ class HttpTest extends TestCase
             Tokens::class,
             new Http(
                 $this->createMock(Transport::class),
-                new Earth(new UTC)
+                new Clock(new UTC)
             )
         );
     }
@@ -46,16 +46,16 @@ class HttpTest extends TestCase
             ->then(function($email, $password, $twofa): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
-                    new Earth(new UTC)
+                    new Clock(new UTC)
                 );
                 $http
                     ->expects($this->once())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($email, $password, $twofa): bool {
-                        return (string) $request->url() === 'https://account.scaleway.com/tokens' &&
-                            (string) $request->method() === 'POST' &&
-                            (string) $request->headers()->get('content-type') === 'Content-Type: application/json' &&
-                            (string) $request->body() === Json::encode([
+                        return $request->url()->toString() === 'https://account.scaleway.com/tokens' &&
+                            $request->method()->toString() === 'POST' &&
+                            $request->headers()->get('content-type')->toString() === 'Content-Type: application/json' &&
+                            $request->body()->toString() === Json::encode([
                                 'email' => $email,
                                 'password' => $password,
                                 'expires' => false,
@@ -66,7 +66,7 @@ class HttpTest extends TestCase
                 $response
                     ->expects($this->once())
                     ->method('body')
-                    ->willReturn(new StringStream(<<<JSON
+                    ->willReturn(Stream::ofContent(<<<JSON
 {
   "token": {
     "creation_date": "2014-05-22T08:05:57.556385+00:00",
@@ -97,16 +97,16 @@ JSON
             ->then(function($email, $password): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
-                    new Earth(new UTC)
+                    new Clock(new UTC)
                 );
                 $http
                     ->expects($this->once())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($email, $password): bool {
-                        return (string) $request->url() === 'https://account.scaleway.com/tokens' &&
-                            (string) $request->method() === 'POST' &&
-                            (string) $request->headers()->get('content-type') === 'Content-Type: application/json' &&
-                            (string) $request->body() === Json::encode([
+                        return $request->url()->toString() === 'https://account.scaleway.com/tokens' &&
+                            $request->method()->toString() === 'POST' &&
+                            $request->headers()->get('content-type')->toString() === 'Content-Type: application/json' &&
+                            $request->body()->toString() === Json::encode([
                                 'email' => $email,
                                 'password' => $password,
                                 'expires' => false,
@@ -116,7 +116,7 @@ JSON
                 $response
                     ->expects($this->once())
                     ->method('body')
-                    ->willReturn(new StringStream(<<<JSON
+                    ->willReturn(Stream::ofContent(<<<JSON
 {
   "token": {
     "creation_date": "2014-05-22T08:05:57.556385+00:00",
@@ -151,16 +151,16 @@ JSON
             ->then(function($email, $password, $twofa): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
-                    new Earth(new UTC)
+                    new Clock(new UTC)
                 );
                 $http
                     ->expects($this->once())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($email, $password, $twofa): bool {
-                        return (string) $request->url() === 'https://account.scaleway.com/tokens' &&
-                            (string) $request->method() === 'POST' &&
-                            (string) $request->headers()->get('content-type') === 'Content-Type: application/json' &&
-                            (string) $request->body() === Json::encode([
+                        return $request->url()->toString() === 'https://account.scaleway.com/tokens' &&
+                            $request->method()->toString() === 'POST' &&
+                            $request->headers()->get('content-type')->toString() === 'Content-Type: application/json' &&
+                            $request->body()->toString() === Json::encode([
                                 'email' => $email,
                                 'password' => $password,
                                 'expires' => true,
@@ -171,7 +171,7 @@ JSON
                 $response
                     ->expects($this->once())
                     ->method('body')
-                    ->willReturn(new StringStream(<<<JSON
+                    ->willReturn(Stream::ofContent(<<<JSON
 {
   "token": {
     "creation_date": "2014-05-22T08:05:57.556385+00:00",
@@ -203,16 +203,16 @@ JSON
             ->then(function($email, $password): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
-                    new Earth(new UTC)
+                    new Clock(new UTC)
                 );
                 $http
                     ->expects($this->once())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($email, $password): bool {
-                        return (string) $request->url() === 'https://account.scaleway.com/tokens' &&
-                            (string) $request->method() === 'POST' &&
-                            (string) $request->headers()->get('content-type') === 'Content-Type: application/json' &&
-                            (string) $request->body() === Json::encode([
+                        return $request->url()->toString() === 'https://account.scaleway.com/tokens' &&
+                            $request->method()->toString() === 'POST' &&
+                            $request->headers()->get('content-type')->toString() === 'Content-Type: application/json' &&
+                            $request->body()->toString() === Json::encode([
                                 'email' => $email,
                                 'password' => $password,
                                 'expires' => true,
@@ -222,7 +222,7 @@ JSON
                 $response
                     ->expects($this->once())
                     ->method('body')
-                    ->willReturn(new StringStream(<<<JSON
+                    ->willReturn(Stream::ofContent(<<<JSON
 {
   "token": {
     "creation_date": "2014-05-22T08:05:57.556385+00:00",

@@ -9,7 +9,7 @@ use Innmind\ScalewaySdk\{
     Authenticated\Marketplace,
     Token,
 };
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use Innmind\HttpTransport\Transport;
 use PHPUnit\Framework\TestCase;
 
@@ -19,7 +19,7 @@ class HttpTest extends TestCase
     {
         $marketplace = new Http(
             $this->createMock(Transport::class),
-            $this->createMock(TimeContinuumInterface::class),
+            $this->createMock(Clock::class),
             new Token\Id('c378c728-8fe9-4e23-a07f-a2f49dff5c46')
         );
 

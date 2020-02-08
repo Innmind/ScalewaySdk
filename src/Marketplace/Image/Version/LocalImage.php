@@ -8,10 +8,7 @@ use Innmind\ScalewaySdk\{
     Region,
     Marketplace\Product\Server\Name,
 };
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
 
 final class LocalImage
 {
@@ -48,9 +45,9 @@ final class LocalImage
     }
 
     /**
-     * @return SetInterface<string>
+     * @return Set<string>
      */
-    public function compatibleCommercialTypes(): SetInterface
+    public function compatibleCommercialTypes(): Set
     {
         return $this->compatibleCommercialTypes;
     }

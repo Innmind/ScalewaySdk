@@ -15,28 +15,22 @@ use Innmind\ScalewaySdk\{
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
-    Headers\Headers,
+    Message\Method,
+    ProtocolVersion,
+    Headers,
     Header\ContentType,
-    Header\ContentTypeValue,
     Header\LinkValue,
 };
-use Innmind\Url\{
-    UrlInterface,
-    Url,
-};
+use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Filesystem\Stream\StringStream;
+use Innmind\Stream\Readable\Stream;
 use Innmind\IP\{
     IPv4,
     IPv6,
     Exception\AddressNotMatchingIPv4Format,
 };
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\first;
 
 final class Http implements IPs
 {
@@ -57,21 +51,19 @@ final class Http implements IPs
     public function create(Organization\Id $organization): IP
     {
         $response = ($this->fulfill)(new Request(
-            Url::fromString("https://cp-{$this->region}.scaleway.com/ips"),
+            Url::of("https://cp-{$this->region}.scaleway.com/ips"),
             Method::post(),
             new ProtocolVersion(2, 0),
             Headers::of(
                 new AuthToken($this->token),
-                new ContentType(
-                    new ContentTypeValue('application', 'json')
-                )
+                ContentType::of('application', 'json'),
             ),
-            new StringStream(Json::encode([
+            Stream::ofContent(Json::encode([
                 'organization' => (string) $organization,
             ]))
         ));
 
-        $ip = Json::decode((string) $response->body())['ip'];
+        $ip = Json::decode($response->body()->toString())['ip'];
 
         return $this->decode($ip);
     }
@@ -79,9 +71,9 @@ final class Http implements IPs
     /**
      * {@inheritdoc}
      */
-    public function list(): SetInterface
+    public function list(): Set
     {
-        $url = Url::fromString("https://cp-{$this->region}.scaleway.com/ips");
+        $url = Url::of("https://cp-{$this->region}.scaleway.com/ips");
         $ips = [];
 
         do {
@@ -96,11 +88,11 @@ final class Http implements IPs
 
             $ips = \array_merge(
                 $ips,
-                Json::decode((string) $response->body())['ips']
+                Json::decode($response->body()->toString())['ips'],
             );
             $next = null;
 
-            if ($response->headers()->has('Link')) {
+            if ($response->headers()->contains('Link')) {
                 $next = $response
                     ->headers()
                     ->get('Link')
@@ -111,17 +103,17 @@ final class Http implements IPs
 
                 if ($next->size() === 1) {
                     $next = $url
-                        ->withPath($next->current()->url()->path())
-                        ->withQuery($next->current()->url()->query());
+                        ->withPath(first($next)->url()->path())
+                        ->withQuery(first($next)->url()->query());
                     $url = $next;
                 }
             }
-        } while ($next instanceof UrlInterface);
+        } while ($next instanceof Url);
 
         $set = Set::of(IP::class);
 
         foreach ($ips as $ip) {
-            $set = $set->add($this->decode($ip));
+            $set = ($set)($this->decode($ip));
         }
 
         return $set;
@@ -130,7 +122,7 @@ final class Http implements IPs
     public function get(IP\Id $id): IP
     {
         $response = ($this->fulfill)(new Request(
-            Url::fromString("https://cp-{$this->region}.scaleway.com/ips/$id"),
+            Url::of("https://cp-{$this->region}.scaleway.com/ips/$id"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -138,7 +130,7 @@ final class Http implements IPs
             )
         ));
 
-        $ip = Json::decode((string) $response->body())['ip'];
+        $ip = Json::decode($response->body()->toString())['ip'];
 
         return $this->decode($ip);
     }
@@ -146,7 +138,7 @@ final class Http implements IPs
     public function remove(IP\Id $id): void
     {
         ($this->fulfill)(new Request(
-            Url::fromString("https://cp-{$this->region}.scaleway.com/ips/$id"),
+            Url::of("https://cp-{$this->region}.scaleway.com/ips/$id"),
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -158,21 +150,19 @@ final class Http implements IPs
     public function attach(IP\Id $id, Server\Id $server): IP
     {
         $response = ($this->fulfill)(new Request(
-            Url::fromString("https://cp-{$this->region}.scaleway.com/ips/$id"),
+            Url::of("https://cp-{$this->region}.scaleway.com/ips/$id"),
             Method::patch(),
             new ProtocolVersion(2, 0),
             Headers::of(
                 new AuthToken($this->token),
-                new ContentType(
-                    new ContentTypeValue('application', 'json')
-                )
+                ContentType::of('application', 'json'),
             ),
-            new StringStream(Json::encode([
+            Stream::ofContent(Json::encode([
                 'server' => (string) $server,
             ]))
         ));
 
-        $ip = Json::decode((string) $response->body())['ip'];
+        $ip = Json::decode($response->body()->toString())['ip'];
 
         return $this->decode($ip);
     }
@@ -180,9 +170,9 @@ final class Http implements IPs
     private function decode(array $ip): IP
     {
         try {
-            $address = new IPv4($ip['address']);
+            $address = IPv4::of($ip['address']);
         } catch (AddressNotMatchingIPv4Format $e) {
-            $address = new IPv6($ip['address']);
+            $address = IPv6::of($ip['address']);
         }
 
         return new IP(

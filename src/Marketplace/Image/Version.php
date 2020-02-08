@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\ScalewaySdk\Marketplace\Image;
 
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
 
 final class Version
 {
@@ -25,9 +22,9 @@ final class Version
     }
 
     /**
-     * @return SetInterface<Version\LocalImage>
+     * @return Set<Version\LocalImage>
      */
-    public function localImages(): SetInterface
+    public function localImages(): Set
     {
         return $this->localImages;
     }

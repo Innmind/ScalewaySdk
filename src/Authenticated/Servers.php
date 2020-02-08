@@ -9,7 +9,7 @@ use Innmind\ScalewaySdk\{
     Image,
     IP,
 };
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
 
 interface Servers
 {
@@ -22,9 +22,9 @@ interface Servers
     ): Server;
 
     /**
-     * @return SetInterface<Server>
+     * @return Set<Server>
      */
-    public function list(): SetInterface;
+    public function list(): Set;
     public function get(Server\Id $id): Server;
     public function remove(Server\Id $id): void;
     public function execute(Server\Id $id, Server\Action $action): void;

@@ -4,20 +4,20 @@ declare(strict_types = 1);
 namespace Innmind\ScalewaySdk;
 
 use Innmind\ScalewaySdk\Token\Id;
-use Innmind\TimeContinuum\PointInTimeInterface;
+use Innmind\TimeContinuum\PointInTime;
 
 final class Token
 {
     private Id $id;
     private User\Id $user;
-    private PointInTimeInterface $createdAt;
-    private ?PointInTimeInterface $expiresAt;
+    private PointInTime $createdAt;
+    private ?PointInTime $expiresAt;
 
     public function __construct(
         Id $id,
         User\Id $user,
-        PointInTimeInterface $createdAt,
-        PointInTimeInterface $expiresAt = null
+        PointInTime $createdAt,
+        PointInTime $expiresAt = null
     ) {
         $this->id = $id;
         $this->user = $user;
@@ -35,17 +35,17 @@ final class Token
         return $this->user;
     }
 
-    public function createdAt(): PointInTimeInterface
+    public function createdAt(): PointInTime
     {
         return $this->createdAt;
     }
 
     public function expires(): bool
     {
-        return $this->expiresAt instanceof PointInTimeInterface;
+        return $this->expiresAt instanceof PointInTime;
     }
 
-    public function expiresAt(): PointInTimeInterface
+    public function expiresAt(): PointInTime
     {
         return $this->expiresAt;
     }

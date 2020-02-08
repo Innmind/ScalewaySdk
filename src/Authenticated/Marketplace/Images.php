@@ -4,13 +4,13 @@ declare(strict_types = 1);
 namespace Innmind\ScalewaySdk\Authenticated\Marketplace;
 
 use Innmind\ScalewaySdk\Marketplace\Image;
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
 
 interface Images
 {
     /**
-     * @return SetInterface<Image>
+     * @return Set<Image>
      */
-    public function list(): SetInterface;
+    public function list(): Set;
     public function get(Image\Id $id): Image;
 }

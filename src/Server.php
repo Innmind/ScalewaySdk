@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\ScalewaySdk;
 
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
 use function Innmind\Immutable\assertSet;
 
 final class Server
@@ -14,9 +14,9 @@ final class Server
     private Image\Id $image;
     private IP\Id $ip;
     private Server\State $state;
-    private SetInterface $allowedActions;
-    private SetInterface $tags;
-    private SetInterface $volumes;
+    private Set $allowedActions;
+    private Set $tags;
+    private Set $volumes;
 
     public function __construct(
         Server\Id $id,
@@ -25,9 +25,9 @@ final class Server
         Image\Id $image,
         IP\Id $ip,
         Server\State $state,
-        SetInterface $allowedActions,
-        SetInterface $tags,
-        SetInterface $volumes
+        Set $allowedActions,
+        Set $tags,
+        Set $volumes
     ) {
         assertSet(Server\Action::class, $allowedActions, 5);
         assertSet('string', $tags, 6);
@@ -75,25 +75,25 @@ final class Server
     }
 
     /**
-     * @return SetInterface<Server\Action>
+     * @return Set<Server\Action>
      */
-    public function allowedActions(): SetInterface
+    public function allowedActions(): Set
     {
         return $this->allowedActions;
     }
 
     /**
-     * @return SetInterface<string>
+     * @return Set<string>
      */
-    public function tags(): SetInterface
+    public function tags(): Set
     {
         return $this->tags;
     }
 
     /**
-     * @return SetInterface<Volume\Id>
+     * @return Set<Volume\Id>
      */
-    public function volumes(): SetInterface
+    public function volumes(): Set
     {
         return $this->volumes;
     }

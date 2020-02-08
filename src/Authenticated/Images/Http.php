@@ -14,20 +14,15 @@ use Innmind\ScalewaySdk\{
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
-    Headers\Headers,
+    Message\Method,
+    ProtocolVersion,
+    Headers,
     Header\LinkValue,
 };
-use Innmind\Url\{
-    UrlInterface,
-    Url,
-};
+use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\first;
 
 final class Http implements Images
 {
@@ -48,9 +43,9 @@ final class Http implements Images
     /**
      * {@inheritdoc}
      */
-    public function list(): SetInterface
+    public function list(): Set
     {
-        $url = Url::fromString("https://cp-{$this->region}.scaleway.com/images");
+        $url = Url::of("https://cp-{$this->region}.scaleway.com/images");
         $images = [];
 
         do {
@@ -65,11 +60,11 @@ final class Http implements Images
 
             $images = \array_merge(
                 $images,
-                Json::decode((string) $response->body())['images']
+                Json::decode($response->body()->toString())['images'],
             );
             $next = null;
 
-            if ($response->headers()->has('Link')) {
+            if ($response->headers()->contains('Link')) {
                 $next = $response
                     ->headers()
                     ->get('Link')
@@ -80,17 +75,17 @@ final class Http implements Images
 
                 if ($next->size() === 1) {
                     $next = $url
-                        ->withPath($next->current()->url()->path())
-                        ->withQuery($next->current()->url()->query());
+                        ->withPath(first($next)->url()->path())
+                        ->withQuery(first($next)->url()->query());
                     $url = $next;
                 }
             }
-        } while ($next instanceof UrlInterface);
+        } while ($next instanceof Url);
 
         $set = Set::of(Image::class);
 
         foreach ($images as $image) {
-            $set = $set->add($this->decode($image));
+            $set = ($set)($this->decode($image));
         }
 
         return $set;
@@ -99,7 +94,7 @@ final class Http implements Images
     public function get(Image\Id $id): Image
     {
         $response = ($this->fulfill)(new Request(
-            Url::fromString("https://cp-{$this->region}.scaleway.com/images/$id"),
+            Url::of("https://cp-{$this->region}.scaleway.com/images/$id"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -107,7 +102,7 @@ final class Http implements Images
             )
         ));
 
-        $image = Json::decode((string) $response->body())['image'];
+        $image = Json::decode($response->body()->toString())['image'];
 
         return $this->decode($image);
     }

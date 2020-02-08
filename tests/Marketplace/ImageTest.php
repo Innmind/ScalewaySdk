@@ -7,8 +7,8 @@ use Innmind\ScalewaySdk\{
     Marketplace\Image,
     Organization,
 };
-use Innmind\TimeContinuum\PointInTimeInterface;
-use Innmind\Url\UrlInterface;
+use Innmind\TimeContinuum\PointInTime;
+use Innmind\Url\Url;
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
 
@@ -25,8 +25,8 @@ class ImageTest extends TestCase
             $versions = Set::of(Image\Version::class, $currentPublicVersion),
             $name = new Image\Name('foo'),
             $categories = Set::of(Image\Category::class),
-            $logo = $this->createMock(UrlInterface::class),
-            $expiresAt = $this->createMock(PointInTimeInterface::class)
+            $logo = Url::of('http://example.com'),
+            $expiresAt = $this->createMock(PointInTime::class)
         );
 
         $this->assertSame($id, $image->id());

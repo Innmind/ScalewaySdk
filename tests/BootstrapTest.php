@@ -9,7 +9,7 @@ use Innmind\HttpTransport\{
     Transport,
     ThrowOnErrorTransport,
 };
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use Innmind\ObjectGraph\{
     Assert\Stack,
     Graph,
@@ -23,7 +23,7 @@ class BootstrapTest extends TestCase
     {
         $sdk = bootstrap(
             $http = $this->createMock(Transport::class),
-            $this->createMock(TimeContinuumInterface::class)
+            $this->createMock(Clock::class)
         );
 
         $this->assertInstanceOf(Scaleway\Http::class, $sdk);

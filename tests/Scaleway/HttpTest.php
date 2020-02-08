@@ -11,7 +11,7 @@ use Innmind\ScalewaySdk\{
     Authenticated,
 };
 use Innmind\HttpTransport\Transport;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use PHPUnit\Framework\TestCase;
 
 class ScalewayTest extends TestCase
@@ -20,7 +20,7 @@ class ScalewayTest extends TestCase
     {
         $scaleway = new Http(
             $this->createMock(Transport::class),
-            $this->createMock(TimeContinuumInterface::class)
+            $this->createMock(Clock::class)
         );
 
         $this->assertInstanceOf(Scaleway::class, $scaleway);

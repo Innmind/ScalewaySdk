@@ -7,10 +7,8 @@ use Innmind\ScalewaySdk\{
     Marketplace\Image\Version\LocalImage,
     Exception\ImageCannotBeDetermined,
 };
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\first;
 
 final class ChooseImage
 {
@@ -33,7 +31,7 @@ final class ChooseImage
             })
             ->reduce(
                 Set::of(LocalImage::class),
-                static function(SetInterface $localImages, Marketplace\Image $image): SetInterface {
+                static function(Set $localImages, Marketplace\Image $image): Set {
                     return $localImages->merge(
                         $image->currentPublicVersion()->localImages()
                     );
@@ -53,6 +51,6 @@ final class ChooseImage
             throw new ImageCannotBeDetermined;
         }
 
-        return $ids->current()->id();
+        return first($ids)->id();
     }
 }
