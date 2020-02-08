@@ -42,7 +42,7 @@ final class Type
         return self::$bssd ??= new self(self::BSSD);
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

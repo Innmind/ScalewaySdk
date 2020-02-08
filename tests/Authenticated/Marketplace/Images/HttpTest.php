@@ -327,10 +327,10 @@ JSON
         $image = $images->get(new Image\Id('25d37e4e-9674-450c-a8ac-96ec3be9a643'));
 
         $this->assertInstanceOf(Image::class, $image);
-        $this->assertSame('8f60c5dd-e659-48da-97e3-fb7de42195f5', (string) $image->id());
-        $this->assertSame('6d6b64e5-6bad-4cc6-b7ef-2030884c3e11', (string) $image->organization());
-        $this->assertSame('Arch Linux', (string) $image->name());
-        $this->assertSame('f7696517-bc49-448b-9869-f2c84e7c2a96', (string) $image->currentPublicVersion()->id());
+        $this->assertSame('8f60c5dd-e659-48da-97e3-fb7de42195f5', $image->id()->toString());
+        $this->assertSame('6d6b64e5-6bad-4cc6-b7ef-2030884c3e11', $image->organization()->toString());
+        $this->assertSame('Arch Linux', $image->name()->toString());
+        $this->assertSame('f7696517-bc49-448b-9869-f2c84e7c2a96', $image->currentPublicVersion()->id()->toString());
         $this->assertFalse($image->expires());
         $this->assertSame(
             'https://marketplace-logos.s3.nl-ams.scw.cloud/archlinux.png',
@@ -342,7 +342,7 @@ JSON
         $this->assertCount(21, first(first($image->versions())->localImages())->compatibleCommercialTypes());
         $this->assertSame(
             'f21defd0-9fd9-4fb2-a29a-22844a6be3cd',
-            (string) first(first($image->versions())->localImages())->id()
+            first(first($image->versions())->localImages())->id()->toString()
         );
         $this->assertSame(
             Architecture::x86_64(),

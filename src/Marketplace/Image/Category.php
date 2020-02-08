@@ -53,7 +53,7 @@ final class Category
         return self::$machineLearning ??= new self(self::MACHINE_LEARNING);
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

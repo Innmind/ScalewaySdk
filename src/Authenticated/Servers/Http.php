@@ -53,7 +53,7 @@ final class Http implements Servers
         string ...$tags
     ): Server {
         $response = ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/servers"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers"),
             Method::post(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -61,13 +61,13 @@ final class Http implements Servers
                 ContentType::of('application', 'json'),
             ),
             Stream::ofContent(Json::encode([
-                'name' => (string) $name,
-                'organization' => (string) $organization,
-                'image' => (string) $image,
+                'name' => $name->toString(),
+                'organization' => $organization->toString(),
+                'image' => $image->toString(),
                 'tags' => $tags,
                 'dynamic_ip_required' => false,
                 'enable_ipv6' => true,
-                'public_ip' => (string) $ip,
+                'public_ip' => $ip->toString(),
             ]))
         ));
 
@@ -81,7 +81,7 @@ final class Http implements Servers
      */
     public function list(): Set
     {
-        $url = Url::of("https://cp-{$this->region}.scaleway.com/servers");
+        $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers");
         $servers = [];
 
         do {
@@ -130,7 +130,7 @@ final class Http implements Servers
     public function get(Server\Id $id): Server
     {
         $response = ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/servers/$id"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers/{$id->toString()}"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -146,7 +146,7 @@ final class Http implements Servers
     public function remove(Server\Id $id): void
     {
         ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/servers/$id"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers/{$id->toString()}"),
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -158,7 +158,7 @@ final class Http implements Servers
     public function execute(Server\Id $id, Server\Action $action): void
     {
         ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/servers/$id/action"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers/{$id->toString()}/action"),
             Method::post(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -166,7 +166,7 @@ final class Http implements Servers
                 ContentType::of('application', 'json'),
             ),
             Stream::ofContent(Json::encode([
-                'action' => (string) $action,
+                'action' => $action->toString(),
             ]))
         ));
     }

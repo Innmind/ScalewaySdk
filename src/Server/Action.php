@@ -83,7 +83,7 @@ final class Action
         return self::$backup ??= new self(self::BACKUP);
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

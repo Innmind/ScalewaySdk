@@ -81,7 +81,7 @@ JSON
         $user = $users->get(new User\Id('25d37e4e-9674-450c-a8ac-96ec3be9a643'));
 
         $this->assertInstanceOf(User::class, $user);
-        $this->assertSame('25d37e4e-9674-450c-a8ac-96ec3be9a643', (string) $user->id());
+        $this->assertSame('25d37e4e-9674-450c-a8ac-96ec3be9a643', $user->id()->toString());
         $this->assertSame('jsnow@got.com', $user->email());
         $this->assertSame('John', $user->firstname());
         $this->assertSame('Snow', $user->lastname());

@@ -51,7 +51,7 @@ final class Http implements IPs
     public function create(Organization\Id $organization): IP
     {
         $response = ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/ips"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips"),
             Method::post(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -59,7 +59,7 @@ final class Http implements IPs
                 ContentType::of('application', 'json'),
             ),
             Stream::ofContent(Json::encode([
-                'organization' => (string) $organization,
+                'organization' => $organization->toString(),
             ]))
         ));
 
@@ -73,7 +73,7 @@ final class Http implements IPs
      */
     public function list(): Set
     {
-        $url = Url::of("https://cp-{$this->region}.scaleway.com/ips");
+        $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips");
         $ips = [];
 
         do {
@@ -122,7 +122,7 @@ final class Http implements IPs
     public function get(IP\Id $id): IP
     {
         $response = ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/ips/$id"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips/{$id->toString()}"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -138,7 +138,7 @@ final class Http implements IPs
     public function remove(IP\Id $id): void
     {
         ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/ips/$id"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips/{$id->toString()}"),
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -150,7 +150,7 @@ final class Http implements IPs
     public function attach(IP\Id $id, Server\Id $server): IP
     {
         $response = ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/ips/$id"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips/{$id->toString()}"),
             Method::patch(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -158,7 +158,7 @@ final class Http implements IPs
                 ContentType::of('application', 'json'),
             ),
             Stream::ofContent(Json::encode([
-                'server' => (string) $server,
+                'server' => $server->toString(),
             ]))
         ));
 

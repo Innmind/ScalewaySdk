@@ -50,7 +50,7 @@ final class Http implements Volumes
         Volume\Type $type
     ): Volume {
         $response = ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/volumes"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes"),
             Method::post(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -58,10 +58,10 @@ final class Http implements Volumes
                 ContentType::of('application', 'json'),
             ),
             Stream::ofContent(Json::encode([
-                'name' => (string) $name,
-                'organization' => (string) $organization,
+                'name' => $name->toString(),
+                'organization' => $organization->toString(),
                 'size' => $size->toInt(),
-                'type' => (string) $type,
+                'type' => $type->toString(),
             ]))
         ));
 
@@ -75,7 +75,7 @@ final class Http implements Volumes
      */
     public function list(): Set
     {
-        $url = Url::of("https://cp-{$this->region}.scaleway.com/volumes");
+        $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes");
         $volumes = [];
 
         do {
@@ -124,7 +124,7 @@ final class Http implements Volumes
     public function get(Volume\Id $id): Volume
     {
         $response = ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/volumes/$id"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes/{$id->toString()}"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -140,7 +140,7 @@ final class Http implements Volumes
     public function remove(Volume\Id $id): void
     {
         ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/volumes/$id"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes/{$id->toString()}"),
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(

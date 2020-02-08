@@ -93,7 +93,7 @@ final class Http implements Tokens
     public function get(Token\Id $id): Token
     {
         $response = ($this->fulfill)(new Request(
-            Url::of("https://account.scaleway.com/tokens/$id"),
+            Url::of("https://account.scaleway.com/tokens/{$id->toString()}"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -109,7 +109,7 @@ final class Http implements Tokens
     public function remove(Token\Id $id): void
     {
         ($this->fulfill)(new Request(
-            Url::of("https://account.scaleway.com/tokens/$id"),
+            Url::of("https://account.scaleway.com/tokens/{$id->toString()}"),
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(

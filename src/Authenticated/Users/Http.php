@@ -39,7 +39,7 @@ final class Http implements Users
     public function get(User\Id $id): User
     {
         $response = ($this->fulfill)(new Request(
-            Url::of("https://account.scaleway.com/users/$id"),
+            Url::of("https://account.scaleway.com/users/{$id->toString()}"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -78,7 +78,7 @@ final class Http implements Users
     public function updateSshKeys(User\Id $id, User\SshKey ...$keys): void
     {
         ($this->fulfill)(new Request(
-            Url::of("https://account.scaleway.com/users/$id"),
+            Url::of("https://account.scaleway.com/users/{$id->toString()}"),
             Method::patch(),
             new ProtocolVersion(2, 0),
             Headers::of(

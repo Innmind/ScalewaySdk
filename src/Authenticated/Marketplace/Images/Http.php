@@ -96,7 +96,7 @@ final class Http implements Images
     public function get(Marketplace\Image\Id $id): Marketplace\Image
     {
         $response = ($this->fulfill)(new Request(
-            Url::of("https://api-marketplace.scaleway.com/images/$id"),
+            Url::of("https://api-marketplace.scaleway.com/images/{$id->toString()}"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -132,7 +132,7 @@ final class Http implements Images
         );
         $currentPublicVersion = first($versions
             ->filter(static function($version) use ($image): bool {
-                return (string) $version->id() === $image['current_public_version'];
+                return $version->id()->toString() === $image['current_public_version'];
             }));
 
         return new Marketplace\Image(

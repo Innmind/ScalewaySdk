@@ -53,7 +53,7 @@ final class Architecture
         return self::$x86_64 ??= new self(self::X86_64);
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

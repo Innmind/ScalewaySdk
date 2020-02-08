@@ -73,7 +73,7 @@ final class State
         return self::$starting ??= new self(self::STARTING);
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

@@ -15,7 +15,7 @@ class IdTest extends TestCase
     {
         $id = new Id('5bea0358-db40-429e-bd82-914686a7e7b9');
 
-        $this->assertSame('5bea0358-db40-429e-bd82-914686a7e7b9', (string) $id);
+        $this->assertSame('5bea0358-db40-429e-bd82-914686a7e7b9', $id->toString());
     }
 
     public function testThrowWhenNotAUuid()

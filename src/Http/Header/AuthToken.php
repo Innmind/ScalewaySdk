@@ -13,6 +13,6 @@ final class AuthToken extends Header
 {
     public function __construct(Id $id)
     {
-        parent::__construct('X-Auth-Token', new Value((string) $id));
+        parent::__construct('X-Auth-Token', new Value($id->toString()));
     }
 }

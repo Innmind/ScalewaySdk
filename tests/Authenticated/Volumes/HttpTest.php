@@ -87,11 +87,11 @@ JSON
         );
 
         $this->assertInstanceOf(Volume::class, $volume);
-        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $volume->id());
-        $this->assertSame('foobar', (string) $volume->name());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $volume->organization());
+        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', $volume->id()->toString());
+        $this->assertSame('foobar', $volume->name()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $volume->organization()->toString());
         $this->assertSame(10000000000, $volume->size()->toInt());
-        $this->assertSame('l_ssd', (string) $volume->type());
+        $this->assertSame('l_ssd', $volume->type()->toString());
     }
 
     public function testList()
@@ -221,11 +221,11 @@ JSON
         $volume = $volumes->get(new Volume\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd'));
 
         $this->assertInstanceOf(Volume::class, $volume);
-        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $volume->id());
-        $this->assertSame('foobar', (string) $volume->name());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $volume->organization());
+        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', $volume->id()->toString());
+        $this->assertSame('foobar', $volume->name()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $volume->organization()->toString());
         $this->assertSame(10000000000, $volume->size()->toInt());
-        $this->assertSame('l_ssd', (string) $volume->type());
+        $this->assertSame('l_ssd', $volume->type()->toString());
     }
 
     public function testRemove()

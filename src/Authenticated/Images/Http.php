@@ -45,7 +45,7 @@ final class Http implements Images
      */
     public function list(): Set
     {
-        $url = Url::of("https://cp-{$this->region}.scaleway.com/images");
+        $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/images");
         $images = [];
 
         do {
@@ -94,7 +94,7 @@ final class Http implements Images
     public function get(Image\Id $id): Image
     {
         $response = ($this->fulfill)(new Request(
-            Url::of("https://cp-{$this->region}.scaleway.com/images/$id"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/images/{$id->toString()}"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(

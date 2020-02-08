@@ -19,8 +19,8 @@ class ActionTest extends TestCase
         $this->assertInstanceOf(Action::class, Action::$name());
         $this->assertSame(Action::$name(), Action::$name());
         $this->assertInstanceOf(Action::class, Action::of($value));
-        $this->assertSame($value, (string) Action::of($value));
-        $this->assertSame($value, (string) Action::$name());
+        $this->assertSame($value, Action::of($value)->toString());
+        $this->assertSame($value, Action::$name()->toString());
     }
 
     public function testThrowWhenUnknownAction()

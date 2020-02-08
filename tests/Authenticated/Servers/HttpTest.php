@@ -127,14 +127,14 @@ JSON
         );
 
         $this->assertInstanceOf(Server::class, $server);
-        $this->assertSame('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c', (string) $server->id());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $server->organization());
-        $this->assertSame('foobar', (string) $server->name());
-        $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', (string) $server->image());
-        $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', (string) $server->ip());
+        $this->assertSame('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c', $server->id()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $server->organization()->toString());
+        $this->assertSame('foobar', $server->name()->toString());
+        $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', $server->image()->toString());
+        $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', $server->ip()->toString());
         $this->assertSame(Server\State::stopped(), $server->state());
         $this->assertSame(['foo', 'bar'], unwrap($server->tags()));
-        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', (string) first($server->volumes()));
+        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', first($server->volumes())->toString());
     }
 
     public function testList()
@@ -350,14 +350,14 @@ JSON
         $server = $servers->get(new Server\Id('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c'));
 
         $this->assertInstanceOf(Server::class, $server);
-        $this->assertSame('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c', (string) $server->id());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $server->organization());
-        $this->assertSame('foobar', (string) $server->name());
-        $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', (string) $server->image());
-        $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', (string) $server->ip());
+        $this->assertSame('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c', $server->id()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $server->organization()->toString());
+        $this->assertSame('foobar', $server->name()->toString());
+        $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', $server->image()->toString());
+        $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', $server->ip()->toString());
         $this->assertSame(Server\State::stopped(), $server->state());
         $this->assertSame(['foo', 'bar'], unwrap($server->tags()));
-        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', (string) first($server->volumes()));
+        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', first($server->volumes())->toString());
         $this->assertSame(
             [Server\Action::backup()],
             unwrap($server->allowedActions())

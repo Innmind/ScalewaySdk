@@ -18,7 +18,7 @@ class CategoryTest extends TestCase
     {
         $this->assertInstanceOf(Category::class, Category::$name());
         $this->assertSame(Category::$name(), Category::$name());
-        $this->assertSame($value, (string) Category::$name());
+        $this->assertSame($value, Category::$name()->toString());
         $this->assertInstanceOf(Category::class, Category::of($value));
         $this->assertSame(Category::$name(), Category::of($value));
     }

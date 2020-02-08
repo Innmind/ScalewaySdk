@@ -43,7 +43,7 @@ final class Region
         return self::$amsterdam1 ??= new self(self::AMSTERDAM1);
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

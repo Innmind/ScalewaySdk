@@ -19,7 +19,7 @@ final class Id
         $this->value = $value;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

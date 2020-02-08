@@ -87,8 +87,8 @@ JSON
                 $token = $tokens->create(NewToken::permanent($email, $password, $twofa));
 
                 $this->assertInstanceOf(Token::class, $token);
-                $this->assertSame('9de8f869-c58e-4aa3-9208-2d4eaff5fa20', (string) $token->id());
-                $this->assertSame('5bea0358-db40-429e-bd82-914686a7e7b9', (string) $token->user());
+                $this->assertSame('9de8f869-c58e-4aa3-9208-2d4eaff5fa20', $token->id()->toString());
+                $this->assertSame('5bea0358-db40-429e-bd82-914686a7e7b9', $token->user()->toString());
                 $this->assertSame('2014-05-22T08:05:57+00:00', $token->createdAt()->format(new ISO8601));
                 $this->assertFalse($token->expires());
             });
@@ -137,8 +137,8 @@ JSON
                 $token = $tokens->create(NewToken::permanent($email, $password));
 
                 $this->assertInstanceOf(Token::class, $token);
-                $this->assertSame('9de8f869-c58e-4aa3-9208-2d4eaff5fa20', (string) $token->id());
-                $this->assertSame('5bea0358-db40-429e-bd82-914686a7e7b9', (string) $token->user());
+                $this->assertSame('9de8f869-c58e-4aa3-9208-2d4eaff5fa20', $token->id()->toString());
+                $this->assertSame('5bea0358-db40-429e-bd82-914686a7e7b9', $token->user()->toString());
                 $this->assertSame('2014-05-22T08:05:57+00:00', $token->createdAt()->format(new ISO8601));
                 $this->assertFalse($token->expires());
             });
@@ -192,8 +192,8 @@ JSON
                 $token = $tokens->create(NewToken::temporary($email, $password, $twofa));
 
                 $this->assertInstanceOf(Token::class, $token);
-                $this->assertSame('9de8f869-c58e-4aa3-9208-2d4eaff5fa20', (string) $token->id());
-                $this->assertSame('5bea0358-db40-429e-bd82-914686a7e7b9', (string) $token->user());
+                $this->assertSame('9de8f869-c58e-4aa3-9208-2d4eaff5fa20', $token->id()->toString());
+                $this->assertSame('5bea0358-db40-429e-bd82-914686a7e7b9', $token->user()->toString());
                 $this->assertSame('2014-05-22T08:05:57+00:00', $token->createdAt()->format(new ISO8601));
                 $this->assertTrue($token->expires());
                 $this->assertSame('2014-05-22T09:05:57+00:00', $token->expiresAt()->format(new ISO8601));
@@ -243,8 +243,8 @@ JSON
                 $token = $tokens->create(NewToken::temporary($email, $password));
 
                 $this->assertInstanceOf(Token::class, $token);
-                $this->assertSame('9de8f869-c58e-4aa3-9208-2d4eaff5fa20', (string) $token->id());
-                $this->assertSame('5bea0358-db40-429e-bd82-914686a7e7b9', (string) $token->user());
+                $this->assertSame('9de8f869-c58e-4aa3-9208-2d4eaff5fa20', $token->id()->toString());
+                $this->assertSame('5bea0358-db40-429e-bd82-914686a7e7b9', $token->user()->toString());
                 $this->assertSame('2014-05-22T08:05:57+00:00', $token->createdAt()->format(new ISO8601));
                 $this->assertTrue($token->expires());
                 $this->assertSame('2014-05-22T09:05:57+00:00', $token->expiresAt()->format(new ISO8601));

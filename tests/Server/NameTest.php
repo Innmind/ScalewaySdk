@@ -28,7 +28,7 @@ class NameTest extends TestCase
             ->then(function($string, $int): void {
                 $this->assertSame(
                     "$string-$int.",
-                    (string) new Name("$string-$int.")
+                    (new Name("$string-$int."))->toString(),
                 );
             });
     }

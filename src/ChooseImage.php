@@ -27,7 +27,7 @@ final class ChooseImage
         $ids = $this
             ->images
             ->filter(static function(Marketplace\Image $marketplace) use ($image): bool {
-                return (string) $marketplace->name() === (string) $image;
+                return $marketplace->name()->toString() === $image->toString();
             })
             ->reduce(
                 Set::of(LocalImage::class),
@@ -42,7 +42,7 @@ final class ChooseImage
                     $localImage
                         ->compatibleCommercialTypes()
                         ->filter(static function($type) use ($server): bool {
-                            return (string) $type === (string) $server;
+                            return $type->toString() === $server->toString();
                         })
                         ->size() > 0;
             });

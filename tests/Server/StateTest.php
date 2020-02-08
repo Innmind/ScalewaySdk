@@ -18,9 +18,9 @@ class StateTest extends TestCase
     {
         $this->assertInstanceOf(State::class, State::$name());
         $this->assertSame(State::$name(), State::$name());
-        $this->assertSame($value, (string) State::$name());
+        $this->assertSame($value, State::$name()->toString());
         $this->assertInstanceOf(State::class, State::of($value));
-        $this->assertSame($value, (string) State::of($value));
+        $this->assertSame($value, State::of($value)->toString());
     }
 
     public function testThrowWhenUnknownValue()

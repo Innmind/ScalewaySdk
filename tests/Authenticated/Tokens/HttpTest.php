@@ -171,7 +171,7 @@ JSON
         $token = $tokens->get(new Token\Id('25d37e4e-9674-450c-a8ac-96ec3be9a643'));
 
         $this->assertInstanceOf(Token::class, $token);
-        $this->assertSame('25d37e4e-9674-450c-a8ac-96ec3be9a643', (string) $token->id());
+        $this->assertSame('25d37e4e-9674-450c-a8ac-96ec3be9a643', $token->id()->toString());
     }
 
     public function testRemove()

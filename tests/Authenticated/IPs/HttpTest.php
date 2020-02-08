@@ -77,8 +77,8 @@ JSON
         $ip = $ips->create(new Organization\Id('000a115d-2852-4b0a-9ce8-47f1134ba95a'));
 
         $this->assertInstanceOf(IP::class, $ip);
-        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $ip->id());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $ip->organization());
+        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', $ip->id()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $ip->organization()->toString());
         $this->assertSame('::1', $ip->address()->toString());
         $this->assertFalse($ip->attachedToAServer());
     }
@@ -202,8 +202,8 @@ JSON
         $ip = $ips->get(new IP\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd'));
 
         $this->assertInstanceOf(IP::class, $ip);
-        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $ip->id());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $ip->organization());
+        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', $ip->id()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $ip->organization()->toString());
         $this->assertSame('127.0.0.1', $ip->address()->toString());
     }
 
@@ -269,10 +269,10 @@ JSON
         );
 
         $this->assertInstanceOf(IP::class, $ip);
-        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $ip->id());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $ip->organization());
+        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', $ip->id()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $ip->organization()->toString());
         $this->assertSame('::1', $ip->address()->toString());
         $this->assertTrue($ip->attachedToAServer());
-        $this->assertSame('49083202-b911-4a4a-b367-6f36c7f1ac4f', (string) $ip->server());
+        $this->assertSame('49083202-b911-4a4a-b367-6f36c7f1ac4f', $ip->server()->toString());
     }
 }
