@@ -24,6 +24,10 @@ use Innmind\ScalewaySdk\{
     Marketplace,
     ChooseImage,
 };
+use function Innmind\Immutable\{
+    first,
+    unwrap,
+};
 
 $os = Factory::build();
 $sdk = bootstrap($os->remote()->http(), $os->clock());
@@ -32,23 +36,23 @@ $token = $sdk
     ->create(NewToken::temporary(
         'foo@example.com',
         'some secret password',
-        '2FACOD' // if 2FA enabled on your account
+        '2FACOD', // if 2FA enabled on your account
     ));
-$organization = $sdk
+$organizations = $sdk
     ->authenticated($token->id())
     ->users()
     ->get($token->user())
-    ->organizations()
-    ->current();
+    ->organizations();
+$organization = first($organizations);
 $servers = $sdk
     ->authenticated($token->id())
     ->servers(Region::paris1());
 $chooseImage = new ChooseImage(
-    ...$sdk
+    ...unwrap($sdk
         ->authenticated($token->id())
         ->marketplace()
         ->images()
-        ->list()
+        ->list()),
 );
 $server = $servers->create(
     new Server\Name('my-server'),
@@ -56,16 +60,16 @@ $server = $servers->create(
     $chooseImage(
         Region::paris1(),
         new Marketplace\Image\Name('CentOS 7.6'),
-        new Marketplace\Product\Server\Name('GP1-XS')
+        new Marketplace\Product\Server\Name('GP1-XS'),
     ),
     $servers
         ->authenticated($token->id())
         ->ips(Region::paris1())
-        ->create($organization)
+        ->create($organization),
 );
 $servers->execute(
     $server->id(),
-    Server\Action::powerOn()
+    Server\Action::powerOn(),
 );
 ```
 
