@@ -1,10 +1,8 @@
 # Scaleway SDK (unofficial)
 
-| `develop` |
-|-----------|
-| [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/?branch=develop) |
-| [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/?branch=develop) |
-| [![Build Status](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/badges/build.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/build-status/develop) |
+[![Build Status](https://github.com/Innmind/ScalewaySdk/workflows/CI/badge.svg)](https://github.com/Innmind/ScalewaySdk/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/Innmind/ScalewaySdk/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/ScalewaySdk)
+[![Type Coverage](https://shepherd.dev/github/Innmind/ScalewaySdk/coverage.svg)](https://shepherd.dev/github/Innmind/ScalewaySdk)
 
 This is a sdk for the [Scaleway](https://scaleway.com/) API.
 
