@@ -20,6 +20,15 @@ class TypeTest extends TestCase
         $this->assertSame('l_ssd', (string) Type::of('l_ssd'));
     }
 
+    public function testBssd()
+    {
+        $this->assertInstanceOf(Type::class, Type::bssd());
+        $this->assertSame(Type::bssd(), Type::bssd());
+        $this->assertSame('b_ssd', (string) Type::bssd());
+        $this->assertInstanceOf(Type::class, Type::of('b_ssd'));
+        $this->assertSame('b_ssd', (string) Type::of('b_ssd'));
+    }
+
     public function testThrowWhenUnknownType()
     {
         $this->expectException(DomainException::class);
