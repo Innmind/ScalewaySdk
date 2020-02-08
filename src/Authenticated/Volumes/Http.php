@@ -65,7 +65,9 @@ final class Http implements Volumes
             ]))
         ));
 
-        $volume = Json::decode($response->body()->toString())['volume'];
+        /** @var array{volume: array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}} */
+        $body = Json::decode($response->body()->toString());
+        $volume = $body['volume'];
 
         return $this->decode($volume);
     }
@@ -76,6 +78,7 @@ final class Http implements Volumes
     public function list(): Set
     {
         $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes");
+        /** @var list<array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}> */
         $volumes = [];
 
         do {
@@ -88,13 +91,19 @@ final class Http implements Volumes
                 )
             ));
 
+            /** @var array{volumes: list<array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}>} */
+            $body = Json::decode($response->body()->toString());
             $volumes = \array_merge(
                 $volumes,
-                Json::decode($response->body()->toString())['volumes']
+                $body['volumes'],
             );
             $next = null;
 
             if ($response->headers()->contains('Link')) {
+                /**
+                 * @psalm-suppress ArgumentTypeCoercion
+                 * @var Set<LinkValue>
+                 */
                 $next = $response
                     ->headers()
                     ->get('Link')
@@ -112,6 +121,7 @@ final class Http implements Volumes
             }
         } while ($next instanceof Url);
 
+        /** @var Set<Volume> */
         $set = Set::of(Volume::class);
 
         foreach ($volumes as $volume) {
@@ -132,7 +142,9 @@ final class Http implements Volumes
             )
         ));
 
-        $volume = Json::decode($response->body()->toString())['volume'];
+        /** @var array{volume: array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}} */
+        $body = Json::decode($response->body()->toString());
+        $volume = $body['volume'];
 
         return $this->decode($volume);
     }
@@ -149,6 +161,9 @@ final class Http implements Volumes
         ));
     }
 
+    /**
+     * @param array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}} $volume
+     */
     private function decode(array $volume): Volume
     {
         return new Volume(

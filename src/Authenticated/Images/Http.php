@@ -46,6 +46,7 @@ final class Http implements Images
     public function list(): Set
     {
         $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/images");
+        /** @var list<array{id: string, organization: string, name: string, arch: string, public: bool}> */
         $images = [];
 
         do {
@@ -58,13 +59,19 @@ final class Http implements Images
                 )
             ));
 
+            /** @var array{images: list<array{id: string, organization: string, name: string, arch: string, public: bool}>} */
+            $body = Json::decode($response->body()->toString());
             $images = \array_merge(
                 $images,
-                Json::decode($response->body()->toString())['images'],
+                $body['images'],
             );
             $next = null;
 
             if ($response->headers()->contains('Link')) {
+                /**
+                 * @psalm-suppress ArgumentTypeCoercion
+                 * @var Set<LinkValue>
+                 */
                 $next = $response
                     ->headers()
                     ->get('Link')
@@ -82,6 +89,7 @@ final class Http implements Images
             }
         } while ($next instanceof Url);
 
+        /** @var Set<Image> */
         $set = Set::of(Image::class);
 
         foreach ($images as $image) {
@@ -102,11 +110,16 @@ final class Http implements Images
             )
         ));
 
-        $image = Json::decode($response->body()->toString())['image'];
+        /** @var array{image: array{id: string, organization: string, name: string, arch: string, public: bool}} */
+        $body = Json::decode($response->body()->toString());
+        $image = $body['image'];
 
         return $this->decode($image);
     }
 
+    /**
+     * @param array{id: string, organization: string, name: string, arch: string, public: bool} $image
+     */
     private function decode(array $image): Image
     {
         return new Image(

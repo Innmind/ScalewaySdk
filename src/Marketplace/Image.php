@@ -14,12 +14,18 @@ final class Image
     private Image\Id $id;
     private Organization\Id $organization;
     private Image\Version $currentPublicVersion;
+    /** @var Set<Image\Version> */
     private Set $versions;
     private Image\Name $name;
+    /** @var Set<Image\Category> */
     private Set $categories;
     private Url $logo;
     private ?PointInTime $expiresAt;
 
+    /**
+     * @param Set<Image\Version> $versions
+     * @param Set<Image\Category> $categories
+     */
     public function __construct(
         Image\Id $id,
         Organization\Id $organization,
@@ -89,8 +95,10 @@ final class Image
         return $this->expiresAt instanceof PointInTime;
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function expiresAt(): PointInTime
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->expiresAt;
     }
 }

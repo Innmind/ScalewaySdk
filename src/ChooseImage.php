@@ -12,10 +12,12 @@ use function Innmind\Immutable\first;
 
 final class ChooseImage
 {
+    /** @var Set<Marketplace\Image> */
     private Set $images;
 
     public function __construct(Marketplace\Image ...$images)
     {
+        /** @var Set<Marketplace\Image> */
         $this->images = Set::of(Marketplace\Image::class, ...$images);
     }
 
@@ -24,6 +26,7 @@ final class ChooseImage
         Marketplace\Image\Name $image,
         Marketplace\Product\Server\Name $server
     ): Image\Id {
+        /** @var Set<LocalImage> */
         $ids = $this
             ->images
             ->filter(static function(Marketplace\Image $marketplace) use ($image): bool {

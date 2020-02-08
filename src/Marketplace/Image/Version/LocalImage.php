@@ -15,6 +15,7 @@ final class LocalImage
     private Image\Id $id;
     private Image\Architecture $architecture;
     private Region $region;
+    /** @var Set<Name> */
     private Set $compatibleCommercialTypes;
 
     public function __construct(
@@ -26,6 +27,7 @@ final class LocalImage
         $this->id = $id;
         $this->architecture = $architecture;
         $this->region = $region;
+        /** @var Set<Name> */
         $this->compatibleCommercialTypes = Set::of(Name::class, ...$compatibleCommercialTypes);
     }
 
@@ -45,7 +47,7 @@ final class LocalImage
     }
 
     /**
-     * @return Set<string>
+     * @return Set<Name>
      */
     public function compatibleCommercialTypes(): Set
     {

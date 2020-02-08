@@ -47,8 +47,12 @@ final class Http implements Users
             )
         ));
 
-        $user = Json::decode($response->body()->toString())['user'];
+        /** @var array{user: array{id: string, email: string, firstname: string, lastname: string, fullname: string, ssh_public_keys?: list<array{key: string, description: string|null}>, organizations?: list<array{id: string}>}} */
+        $body = Json::decode($response->body()->toString());
+        $user = $body['user'];
+        /** @var Set<User\SshKey> */
         $keys = Set::of(User\SshKey::class);
+        /** @var Set<Organization\Id> */
         $organizations = Set::of(Organization\Id::class);
 
         foreach ($user['ssh_public_keys'] ?? [] as $key) {

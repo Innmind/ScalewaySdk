@@ -45,6 +45,7 @@ final class Http implements Tokens
     public function list(): Set
     {
         $url = Url::of('https://account.scaleway.com/tokens');
+        /** @var list<array{id: string, user_id: string, creation_date: string, expires: string|null}> */
         $tokens = [];
 
         do {
@@ -57,13 +58,19 @@ final class Http implements Tokens
                 )
             ));
 
+            /** @var array{tokens: list<array{id: string, user_id: string, creation_date: string, expires: string|null}>} */
+            $body = Json::decode($response->body()->toString());
             $tokens = \array_merge(
                 $tokens,
-                Json::decode($response->body()->toString())['tokens']
+                $body['tokens'],
             );
             $next = null;
 
             if ($response->headers()->contains('Link')) {
+                /**
+                 * @psalm-suppress ArgumentTypeCoercion
+                 * @var Set<LinkValue>
+                 */
                 $next = $response
                     ->headers()
                     ->get('Link')
@@ -81,6 +88,7 @@ final class Http implements Tokens
             }
         } while ($next instanceof Url);
 
+        /** @var Set<Token> */
         $set = Set::of(Token::class);
 
         foreach ($tokens as $token) {
@@ -101,7 +109,9 @@ final class Http implements Tokens
             )
         ));
 
-        $token = Json::decode($response->body()->toString())['token'];
+        /** @var array{token: array{id: string, user_id: string, creation_date: string, expires: string|null}} */
+        $body = Json::decode($response->body()->toString());
+        $token = $body['token'];
 
         return $this->decode($token);
     }
@@ -118,6 +128,9 @@ final class Http implements Tokens
         ));
     }
 
+    /**
+     * @param array{id: string, user_id: string, creation_date: string, expires: string|null} $token
+     */
     private function decode(array $token): Token
     {
         return new Token(

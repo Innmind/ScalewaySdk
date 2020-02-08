@@ -54,7 +54,9 @@ final class Http implements Tokens
             Stream::ofContent(Json::encode($payload)),
         ));
 
-        $data = Json::decode($response->body()->toString())['token'];
+        /** @var array{token: array{id: string, user_id: string, creation_date: string, expires: string|null}} */
+        $body = Json::decode($response->body()->toString());
+        $data = $body['token'];
 
         return new Token(
             new Token\Id($data['id']),

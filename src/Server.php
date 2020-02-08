@@ -14,10 +14,18 @@ final class Server
     private Image\Id $image;
     private IP\Id $ip;
     private Server\State $state;
+    /** @var Set<Server\Action> */
     private Set $allowedActions;
+    /** @var Set<string> */
     private Set $tags;
+    /** @var Set<Volume\Id> */
     private Set $volumes;
 
+    /**
+     * @param Set<Server\Action> $allowedActions
+     * @param Set<string> $tags
+     * @param Set<Volume\Id> $volumes
+     */
     public function __construct(
         Server\Id $id,
         Organization\Id $organization,

@@ -58,8 +58,10 @@ final class NewToken
         return \is_string($this->twoFaToken);
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function twoFaToken(): string
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->twoFaToken;
     }
 }

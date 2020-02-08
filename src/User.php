@@ -18,9 +18,15 @@ final class User
     private string $firstname;
     private string $lastname;
     private string $fullname;
+    /** @var Set<SshKey> */
     private Set $sshKeys;
+    /** @var Set<Organization\Id> */
     private Set $organizations;
 
+    /**
+     * @param Set<SshKey> $sshKeys
+     * @param Set<Organization\Id> $organizations
+     */
     public function __construct(
         Id $id,
         string $email,
@@ -76,7 +82,7 @@ final class User
     }
 
     /**
-     * @return Set<Organization>
+     * @return Set<Organization\Id>
      */
     public function organizations(): Set
     {

@@ -48,6 +48,7 @@ final class Http implements Images
     public function list(): Set
     {
         $url = Url::of("https://api-marketplace.scaleway.com/images");
+        /** @var list<array{id: string, name: string, logo: string, categories: list<string>, valid_until: string|null, organization: array{id: string}, current_public_version: string, versions: list<array{id: string, local_images: list<array{id: string, arch: string, zone: string, compatible_commercial_types: list<string>}>}>}> */
         $images = [];
 
         do {
@@ -60,13 +61,19 @@ final class Http implements Images
                 )
             ));
 
+            /** @var array{images: list<array{id: string, name: string, logo: string, categories: list<string>, valid_until: string|null, organization: array{id: string}, current_public_version: string, versions: list<array{id: string, local_images: list<array{id: string, arch: string, zone: string, compatible_commercial_types: list<string>}>}>}>} */
+            $body = Json::decode($response->body()->toString());
             $images = \array_merge(
                 $images,
-                Json::decode($response->body()->toString())['images'],
+                $body['images'],
             );
             $next = null;
 
             if ($response->headers()->contains('Link')) {
+                /**
+                 * @psalm-suppress ArgumentTypeCoercion
+                 * @var Set<LinkValue>
+                 */
                 $next = $response
                     ->headers()
                     ->get('Link')
@@ -84,6 +91,7 @@ final class Http implements Images
             }
         } while ($next instanceof Url);
 
+        /** @var Set<Marketplace\Image> */
         $set = Set::of(Marketplace\Image::class);
 
         foreach ($images as $image) {
@@ -104,16 +112,23 @@ final class Http implements Images
             )
         ));
 
-        $image = Json::decode($response->body()->toString())['image'];
+        /** @var array{image: array{id: string, name: string, logo: string, categories: list<string>, valid_until: string|null, organization: array{id: string}, current_public_version: string, versions: list<array{id: string, local_images: list<array{id: string, arch: string, zone: string, compatible_commercial_types: list<string>}>}>}} */
+        $body = Json::decode($response->body()->toString());
+        $image = $body['image'];
 
         return $this->decode($image);
     }
 
+    /**
+     * @param array{id: string, name: string, logo: string, categories: list<string>, valid_until: string|null, organization: array{id: string}, current_public_version: string, versions: list<array{id: string, local_images: list<array{id: string, arch: string, zone: string, compatible_commercial_types: list<string>}>}>} $image
+     */
     private function decode(array $image): Marketplace\Image
     {
+        /** @var Set<Marketplace\Image\Version> */
         $versions = \array_reduce(
             $image['versions'],
             static function(Set $versions, array $version): Set {
+                /** @var array{id: string, local_images: list<array{id: string, arch: string, zone: string, compatible_commercial_types: list<string>}>} $version */
                 return ($versions)(new Marketplace\Image\Version(
                     new Marketplace\Image\Version\Id($version['id']),
                     ...\array_map(static function(array $image) {
@@ -135,19 +150,22 @@ final class Http implements Images
                 return $version->id()->toString() === $image['current_public_version'];
             }));
 
+        /** @var Set<Marketplace\Image\Category> */
+        $categories = \array_reduce(
+            $image['categories'],
+            static function(Set $categories, string $category): Set {
+                return $categories->add(Marketplace\Image\Category::of($category));
+            },
+            Set::of(Marketplace\Image\Category::class)
+        );
+
         return new Marketplace\Image(
             new Marketplace\Image\Id($image['id']),
             new Organization\Id($image['organization']['id']),
             $currentPublicVersion,
             $versions,
             new Marketplace\Image\Name($image['name']),
-            \array_reduce(
-                $image['categories'],
-                static function(Set $categories, string $category): Set {
-                    return $categories->add(Marketplace\Image\Category::of($category));
-                },
-                Set::of(Marketplace\Image\Category::class)
-            ),
+            $categories,
             Url::of($image['logo']),
             \is_string($image['valid_until']) ? $this->clock->at($image['valid_until']) : null
         );

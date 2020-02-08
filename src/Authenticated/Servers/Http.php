@@ -71,7 +71,9 @@ final class Http implements Servers
             ]))
         ));
 
-        $server = Json::decode($response->body()->toString())['server'];
+        /** @var array{server: array{id: string, organization: string, name: string, image: array{id: string}, public_ip: array{id: string}, state: string, allowed_actions?: list<string>, tags: list<string>, volumes: list<array{id: string}>}} */
+        $body = Json::decode($response->body()->toString());
+        $server = $body['server'];
 
         return $this->decode($server);
     }
@@ -82,6 +84,7 @@ final class Http implements Servers
     public function list(): Set
     {
         $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers");
+        /** @var list<array{id: string, organization: string, name: string, image: array{id: string}, public_ip: array{id: string}, state: string, allowed_actions?: list<string>, tags: list<string>, volumes: list<array{id: string}>}> */
         $servers = [];
 
         do {
@@ -94,13 +97,19 @@ final class Http implements Servers
                 )
             ));
 
+            /** @var array{servers: list<array{id: string, organization: string, name: string, image: array{id: string}, public_ip: array{id: string}, state: string, allowed_actions?: list<string>, tags: list<string>, volumes: list<array{id: string}>}>} */
+            $body = Json::decode($response->body()->toString());
             $servers = \array_merge(
                 $servers,
-                Json::decode($response->body()->toString())['servers']
+                $body['servers'],
             );
             $next = null;
 
             if ($response->headers()->contains('Link')) {
+                /**
+                 * @psalm-suppress ArgumentTypeCoercion
+                 * @var Set<LinkValue>
+                 */
                 $next = $response
                     ->headers()
                     ->get('Link')
@@ -118,6 +127,7 @@ final class Http implements Servers
             }
         } while ($next instanceof Url);
 
+        /** @var Set<Server> */
         $set = Set::of(Server::class);
 
         foreach ($servers as $server) {
@@ -138,7 +148,9 @@ final class Http implements Servers
             )
         ));
 
-        $server = Json::decode($response->body()->toString())['server'];
+        /** @var array{server: array{id: string, organization: string, name: string, image: array{id: string}, public_ip: array{id: string}, state: string, allowed_actions?: list<string>, tags: list<string>, volumes: list<array{id: string}>}} */
+        $body = Json::decode($response->body()->toString());
+        $server = $body['server'];
 
         return $this->decode($server);
     }
@@ -171,8 +183,29 @@ final class Http implements Servers
         ));
     }
 
+    /**
+     * @param array{id: string, organization: string, name: string, image: array{id: string}, public_ip: array{id: string}, state: string, allowed_actions?: list<string>, tags: list<string>, volumes: list<array{id: string}>} $server
+     */
     private function decode(array $server): Server
     {
+        /** @var Set<Server\Action> */
+        $actions = \array_reduce(
+            $server['allowed_actions'] ?? [],
+            static function(Set $allowed, string $action): Set {
+                return ($allowed)(Server\Action::of($action));
+            },
+            Set::of(Server\Action::class),
+        );
+        /** @var Set<Volume\Id> */
+        $volumes = \array_reduce(
+            $server['volumes'],
+            static function(Set $volumes, array $volume): Set {
+                /** @var array{id: string} $volume */
+                return ($volumes)(new Volume\Id($volume['id']));
+            },
+            Set::of(Volume\Id::class),
+        );
+
         return new Server(
             new Server\Id($server['id']),
             new Organization\Id($server['organization']),
@@ -180,21 +213,9 @@ final class Http implements Servers
             new Image\Id($server['image']['id']),
             new IP\Id($server['public_ip']['id']),
             Server\State::of($server['state']),
-            \array_reduce(
-                $server['allowed_actions'] ?? [],
-                static function(Set $allowed, string $action): Set {
-                    return ($allowed)(Server\Action::of($action));
-                },
-                Set::of(Server\Action::class)
-            ),
-            Set::of('string', ...$server['tags']),
-            \array_reduce(
-                $server['volumes'],
-                static function(Set $volumes, array $volume): Set {
-                    return ($volumes)(new Volume\Id($volume['id']));
-                },
-                Set::of(Volume\Id::class)
-            )
+            $actions,
+            Set::strings(...$server['tags']),
+            $volumes,
         );
     }
 }

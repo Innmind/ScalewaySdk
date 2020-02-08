@@ -63,7 +63,9 @@ final class Http implements IPs
             ]))
         ));
 
-        $ip = Json::decode($response->body()->toString())['ip'];
+        /** @var array{ip: array{address: string, id: string, organization: string, server: ?array{id: string}}} */
+        $body = Json::decode($response->body()->toString());
+        $ip = $body['ip'];
 
         return $this->decode($ip);
     }
@@ -74,6 +76,7 @@ final class Http implements IPs
     public function list(): Set
     {
         $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips");
+        /** @var list<array{address: string, id: string, organization: string, server: ?array{id: string}}> */
         $ips = [];
 
         do {
@@ -86,13 +89,19 @@ final class Http implements IPs
                 )
             ));
 
+            /** @var array{ips: list<array{address: string, id: string, organization: string, server: ?array{id: string}}>} */
+            $body = Json::decode($response->body()->toString());
             $ips = \array_merge(
                 $ips,
-                Json::decode($response->body()->toString())['ips'],
+                $body['ips'],
             );
             $next = null;
 
             if ($response->headers()->contains('Link')) {
+                /**
+                 * @psalm-suppress ArgumentTypeCoercion
+                 * @var Set<LinkValue>
+                 */
                 $next = $response
                     ->headers()
                     ->get('Link')
@@ -110,6 +119,7 @@ final class Http implements IPs
             }
         } while ($next instanceof Url);
 
+        /** @var Set<IP> */
         $set = Set::of(IP::class);
 
         foreach ($ips as $ip) {
@@ -130,7 +140,9 @@ final class Http implements IPs
             )
         ));
 
-        $ip = Json::decode($response->body()->toString())['ip'];
+        /** @var array{ip: array{address: string, id: string, organization: string, server: ?array{id: string}}} */
+        $body = Json::decode($response->body()->toString());
+        $ip = $body['ip'];
 
         return $this->decode($ip);
     }
@@ -162,11 +174,16 @@ final class Http implements IPs
             ]))
         ));
 
-        $ip = Json::decode($response->body()->toString())['ip'];
+        /** @var array{ip: array{address: string, id: string, organization: string, server: ?array{id: string}}} */
+        $body = Json::decode($response->body()->toString());
+        $ip = $body['ip'];
 
         return $this->decode($ip);
     }
 
+    /**
+     * @param array{address: string, id: string, organization: string, server: ?array{id: string}} $ip
+     */
     private function decode(array $ip): IP
     {
         try {

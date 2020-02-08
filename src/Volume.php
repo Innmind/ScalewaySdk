@@ -58,8 +58,10 @@ final class Volume
         return $this->server instanceof Server\Id;
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function server(): Server\Id
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->server;
     }
 }

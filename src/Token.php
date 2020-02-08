@@ -45,8 +45,10 @@ final class Token
         return $this->expiresAt instanceof PointInTime;
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function expiresAt(): PointInTime
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->expiresAt;
     }
 }

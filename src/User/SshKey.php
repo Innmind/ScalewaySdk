@@ -24,8 +24,10 @@ final class SshKey
         return \is_string($this->description);
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function description(): string
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->description;
     }
 }
