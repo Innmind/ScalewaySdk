@@ -15,29 +15,23 @@ use Innmind\ScalewaySdk\{
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
-    Headers\Headers,
+    Message\Method,
+    ProtocolVersion,
+    Headers,
     Header\ContentType,
-    Header\ContentTypeValue,
     Header\LinkValue,
 };
-use Innmind\Url\{
-    UrlInterface,
-    Url,
-};
+use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Filesystem\Stream\StringStream;
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Stream\Readable\Stream;
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\first;
 
 final class Http implements Volumes
 {
-    private $fulfill;
-    private $region;
-    private $token;
+    private Transport $fulfill;
+    private Region $region;
+    private Token\Id $token;
 
     public function __construct(
         Transport $fulfill,
@@ -56,34 +50,31 @@ final class Http implements Volumes
         Volume\Type $type
     ): Volume {
         $response = ($this->fulfill)(new Request(
-            Url::fromString("https://cp-{$this->region}.scaleway.com/volumes"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes"),
             Method::post(),
             new ProtocolVersion(2, 0),
             Headers::of(
                 new AuthToken($this->token),
-                new ContentType(
-                    new ContentTypeValue('application', 'json')
-                )
+                ContentType::of('application', 'json'),
             ),
-            new StringStream(Json::encode([
-                'name' => (string) $name,
-                'organization' => (string) $organization,
+            Stream::ofContent(Json::encode([
+                'name' => $name->toString(),
+                'organization' => $organization->toString(),
                 'size' => $size->toInt(),
-                'type' => (string) $type,
-            ]))
+                'type' => $type->toString(),
+            ])),
         ));
 
-        $volume = Json::decode((string) $response->body())['volume'];
+        /** @var array{volume: array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}} */
+        $body = Json::decode($response->body()->toString());
 
-        return $this->decode($volume);
+        return $this->decode($body['volume']);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function list(): SetInterface
+    public function list(): Set
     {
-        $url = Url::fromString("https://cp-{$this->region}.scaleway.com/volumes");
+        $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes");
+        /** @var list<array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}> */
         $volumes = [];
 
         do {
@@ -92,17 +83,23 @@ final class Http implements Volumes
                 Method::get(),
                 new ProtocolVersion(2, 0),
                 Headers::of(
-                    new AuthToken($this->token)
-                )
+                    new AuthToken($this->token),
+                ),
             ));
 
+            /** @var array{volumes: list<array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}>} */
+            $body = Json::decode($response->body()->toString());
             $volumes = \array_merge(
                 $volumes,
-                Json::decode((string) $response->body())['volumes']
+                $body['volumes'],
             );
             $next = null;
 
-            if ($response->headers()->has('Link')) {
+            if ($response->headers()->contains('Link')) {
+                /**
+                 * @psalm-suppress ArgumentTypeCoercion
+                 * @var Set<LinkValue>
+                 */
                 $next = $response
                     ->headers()
                     ->get('Link')
@@ -113,17 +110,18 @@ final class Http implements Volumes
 
                 if ($next->size() === 1) {
                     $next = $url
-                        ->withPath($next->current()->url()->path())
-                        ->withQuery($next->current()->url()->query());
+                        ->withPath(first($next)->url()->path())
+                        ->withQuery(first($next)->url()->query());
                     $url = $next;
                 }
             }
-        } while ($next instanceof UrlInterface);
+        } while ($next instanceof Url);
 
+        /** @var Set<Volume> */
         $set = Set::of(Volume::class);
 
         foreach ($volumes as $volume) {
-            $set = $set->add($this->decode($volume));
+            $set = ($set)($this->decode($volume));
         }
 
         return $set;
@@ -132,31 +130,35 @@ final class Http implements Volumes
     public function get(Volume\Id $id): Volume
     {
         $response = ($this->fulfill)(new Request(
-            Url::fromString("https://cp-{$this->region}.scaleway.com/volumes/$id"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes/{$id->toString()}"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
 
-        $volume = Json::decode((string) $response->body())['volume'];
+        /** @var array{volume: array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}} */
+        $body = Json::decode($response->body()->toString());
 
-        return $this->decode($volume);
+        return $this->decode($body['volume']);
     }
 
     public function remove(Volume\Id $id): void
     {
         ($this->fulfill)(new Request(
-            Url::fromString("https://cp-{$this->region}.scaleway.com/volumes/$id"),
+            Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes/{$id->toString()}"),
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
     }
 
+    /**
+     * @param array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}} $volume
+     */
     private function decode(array $volume): Volume
     {
         return new Volume(
@@ -165,7 +167,7 @@ final class Http implements Volumes
             new Organization\Id($volume['organization']),
             Volume\Size::of($volume['size']),
             Volume\Type::of($volume['volume_type']),
-            \is_array($volume['server']) ? new Server\Id($volume['server']['id']) : null
+            \is_array($volume['server']) ? new Server\Id($volume['server']['id']) : null,
         );
     }
 }

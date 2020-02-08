@@ -7,7 +7,7 @@ use Innmind\ScalewaySdk\{
     Volume,
     Organization,
 };
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
 
 interface Volumes
 {
@@ -19,9 +19,9 @@ interface Volumes
     ): Volume;
 
     /**
-     * @return SetInterface<Volume>
+     * @return Set<Volume>
      */
-    public function list(): SetInterface;
+    public function list(): Set;
     public function get(Volume\Id $id): Volume;
     public function remove(Volume\Id $id): void;
 }

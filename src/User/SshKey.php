@@ -5,8 +5,8 @@ namespace Innmind\ScalewaySdk\User;
 
 final class SshKey
 {
-    private $key;
-    private $description;
+    private string $key;
+    private ?string $description;
 
     public function __construct(string $key, string $description = null)
     {
@@ -24,8 +24,10 @@ final class SshKey
         return \is_string($this->description);
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function description(): string
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->description;
     }
 }

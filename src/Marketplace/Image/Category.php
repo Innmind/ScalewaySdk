@@ -11,11 +11,11 @@ final class Category
     private const DISTRIBUTION = 'distribution';
     private const MACHINE_LEARNING = 'Machine Learning';
 
-    private static $instantApp;
-    private static $distribution;
-    private static $machineLearning;
+    private static ?self $instantApp = null;
+    private static ?self $distribution = null;
+    private static ?self $machineLearning = null;
 
-    private $value;
+    private string $value;
 
     private function __construct(string $value)
     {
@@ -40,20 +40,20 @@ final class Category
 
     public static function instantApp(): self
     {
-        return self::$instantApp ?? self::$instantApp = new self(self::INSTANT_APP);
+        return self::$instantApp ??= new self(self::INSTANT_APP);
     }
 
     public static function distribution(): self
     {
-        return self::$distribution ?? self::$distribution = new self(self::DISTRIBUTION);
+        return self::$distribution ??= new self(self::DISTRIBUTION);
     }
 
     public static function machineLearning(): self
     {
-        return self::$machineLearning ?? self::$machineLearning = new self(self::MACHINE_LEARNING);
+        return self::$machineLearning ??= new self(self::MACHINE_LEARNING);
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

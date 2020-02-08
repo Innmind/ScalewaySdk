@@ -4,14 +4,14 @@ declare(strict_types = 1);
 namespace Innmind\ScalewaySdk\Authenticated;
 
 use Innmind\ScalewaySdk\Token;
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
 
 interface Tokens
 {
     /**
-     * @return SetInterface<Token>
+     * @return Set<Token>
      */
-    public function list(): SetInterface;
+    public function list(): Set;
     public function get(Token\Id $id): Token;
     public function remove(Token\Id $id): void;
 }

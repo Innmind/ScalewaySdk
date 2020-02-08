@@ -5,12 +5,12 @@ namespace Innmind\ScalewaySdk;
 
 final class Volume
 {
-    private $id;
-    private $name;
-    private $organization;
-    private $size;
-    private $type;
-    private $server;
+    private Volume\Id $id;
+    private Volume\Name $name;
+    private Organization\Id $organization;
+    private Volume\Size $size;
+    private Volume\Type $type;
+    private ?Server\Id $server;
 
     public function __construct(
         Volume\Id $id,
@@ -58,8 +58,10 @@ final class Volume
         return $this->server instanceof Server\Id;
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function server(): Server\Id
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->server;
     }
 }

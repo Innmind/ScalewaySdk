@@ -11,7 +11,7 @@ use Innmind\ScalewaySdk\{
     Region,
     Exception\ImageCannotBeDetermined,
 };
-use Innmind\Url\UrlInterface;
+use Innmind\Url\Url;
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
 
@@ -37,7 +37,7 @@ class ChooseImageTest extends TestCase
             Set::of(Marketplace\Image\Version::class, $currentPublicVersion),
             new Marketplace\Image\Name('Ubuntu'),
             Set::of(Marketplace\Image\Category::class),
-            $this->createMock(UrlInterface::class),
+            Url::of('http://example.com'),
             null
         );
     }

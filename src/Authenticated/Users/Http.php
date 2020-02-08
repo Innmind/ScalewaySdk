@@ -13,24 +13,20 @@ use Innmind\ScalewaySdk\{
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
-    Headers\Headers,
+    Message\Method,
+    ProtocolVersion,
+    Headers,
     Header\ContentType,
-    Header\ContentTypeValue,
 };
-use Innmind\Url\{
-    UrlInterface,
-    Url,
-};
+use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Filesystem\Stream\StringStream;
+use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 
 final class Http implements Users
 {
-    private $fulfill;
-    private $token;
+    private Transport $fulfill;
+    private Token\Id $token;
 
     public function __construct(
         Transport $fulfill,
@@ -43,28 +39,32 @@ final class Http implements Users
     public function get(User\Id $id): User
     {
         $response = ($this->fulfill)(new Request(
-            Url::fromString("https://account.scaleway.com/users/$id"),
+            Url::of("https://account.scaleway.com/users/{$id->toString()}"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
 
-        $user = Json::decode((string) $response->body())['user'];
+        /** @var array{user: array{id: string, email: string, firstname: string, lastname: string, fullname: string, ssh_public_keys?: list<array{key: string, description: string|null}>, organizations?: list<array{id: string}>}} */
+        $body = Json::decode($response->body()->toString());
+        $user = $body['user'];
+        /** @var Set<User\SshKey> */
         $keys = Set::of(User\SshKey::class);
+        /** @var Set<Organization\Id> */
         $organizations = Set::of(Organization\Id::class);
 
         foreach ($user['ssh_public_keys'] ?? [] as $key) {
-            $keys = $keys->add(new User\SshKey(
+            $keys = ($keys)(new User\SshKey(
                 $key['key'],
-                $key['description']
+                $key['description'],
             ));
         }
 
         foreach ($user['organizations'] ?? [] as $organization) {
-            $organizations = $organizations->add(new Organization\Id(
-                $organization['id']
+            $organizations = ($organizations)(new Organization\Id(
+                $organization['id'],
             ));
         }
 
@@ -75,30 +75,28 @@ final class Http implements Users
             $user['lastname'],
             $user['fullname'],
             $keys,
-            $organizations
+            $organizations,
         );
     }
 
     public function updateSshKeys(User\Id $id, User\SshKey ...$keys): void
     {
         ($this->fulfill)(new Request(
-            Url::fromString("https://account.scaleway.com/users/$id"),
+            Url::of("https://account.scaleway.com/users/{$id->toString()}"),
             Method::patch(),
             new ProtocolVersion(2, 0),
             Headers::of(
                 new AuthToken($this->token),
-                new ContentType(
-                    new ContentTypeValue('application', 'json')
-                )
+                ContentType::of('application', 'json'),
             ),
-            new StringStream(Json::encode([
+            Stream::ofContent(Json::encode([
                 'ssh_public_keys' => \array_map(static function($key): array {
                     return [
                         'key' => $key->key(),
                         'description' => $key->hasDescription() ? $key->description() : null,
                     ];
                 }, $keys),
-            ]))
+            ])),
         ));
     }
 }

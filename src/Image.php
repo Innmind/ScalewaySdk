@@ -5,11 +5,11 @@ namespace Innmind\ScalewaySdk;
 
 final class Image
 {
-    private $id;
-    private $organization;
-    private $name;
-    private $architecture;
-    private $public;
+    private Image\Id $id;
+    private Organization\Id $organization;
+    private Image\Name $name;
+    private Image\Architecture $architecture;
+    private bool $public;
 
     public function __construct(
         Image\Id $id,

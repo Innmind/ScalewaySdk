@@ -14,14 +14,15 @@ use Innmind\ScalewaySdk\{
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Response,
-    Headers\Headers,
+    Headers,
     Header\Link,
     Header\LinkValue,
 };
 use Innmind\Url\Url;
-use Innmind\Filesystem\Stream\StringStream;
+use Innmind\Stream\Readable\Stream;
 use Innmind\Json\Json;
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
 class HttpTest extends TestCase
@@ -49,10 +50,10 @@ class HttpTest extends TestCase
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/volumes' &&
-                    (string) $request->method() === 'POST' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
-                    (string) $request->body() === Json::encode([
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/volumes' &&
+                    $request->method()->toString() === 'POST' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
+                    $request->body()->toString() === Json::encode([
                         'name' => 'foobar',
                         'organization' => '000a115d-2852-4b0a-9ce8-47f1134ba95a',
                         'size' => 10000000000,
@@ -63,7 +64,7 @@ class HttpTest extends TestCase
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "volume": {
         "export_uri": null,
@@ -86,11 +87,11 @@ JSON
         );
 
         $this->assertInstanceOf(Volume::class, $volume);
-        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $volume->id());
-        $this->assertSame('foobar', (string) $volume->name());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $volume->organization());
+        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', $volume->id()->toString());
+        $this->assertSame('foobar', $volume->name()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $volume->organization()->toString());
         $this->assertSame(10000000000, $volume->size()->toInt());
-        $this->assertSame('l_ssd', (string) $volume->type());
+        $this->assertSame('l_ssd', $volume->type()->toString());
     }
 
     public function testList()
@@ -104,9 +105,9 @@ JSON
             ->expects($this->at(0))
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/volumes' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/volumes' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
@@ -114,13 +115,13 @@ JSON
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::fromString('/volumes?page=2&per_page=50'), 'next')
+                    new LinkValue(Url::of('/volumes?page=2&per_page=50'), 'next')
                 )
             ));
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "volumes": [
         {
@@ -140,15 +141,19 @@ JSON
             ->expects($this->at(1))
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/volumes?page=2&per_page=50' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/volumes?page=2&per_page=50' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
             ->expects($this->once())
+            ->method('headers')
+            ->willReturn(Headers::of());
+        $response
+            ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "volumes": [
         {
@@ -170,12 +175,13 @@ JSON
 
         $volumes = $volumes->list();
 
-        $this->assertInstanceOf(SetInterface::class, $volumes);
+        $this->assertInstanceOf(Set::class, $volumes);
         $this->assertSame(Volume::class, (string) $volumes->type());
         $this->assertCount(2, $volumes);
-        $this->assertFalse($volumes->current()->attachedToAServer());
-        $volumes->next();
-        $this->assertTrue($volumes->current()->attachedToAServer());
+        $volumes = unwrap($volumes);
+        $this->assertFalse(\current($volumes)->attachedToAServer());
+        \next($volumes);
+        $this->assertTrue(\current($volumes)->attachedToAServer());
     }
 
     public function testGet()
@@ -189,15 +195,15 @@ JSON
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/volumes/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/volumes/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "volume": {
         "export_uri": null,
@@ -215,11 +221,11 @@ JSON
         $volume = $volumes->get(new Volume\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd'));
 
         $this->assertInstanceOf(Volume::class, $volume);
-        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $volume->id());
-        $this->assertSame('foobar', (string) $volume->name());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $volume->organization());
+        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', $volume->id()->toString());
+        $this->assertSame('foobar', $volume->name()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $volume->organization()->toString());
         $this->assertSame(10000000000, $volume->size()->toInt());
-        $this->assertSame('l_ssd', (string) $volume->type());
+        $this->assertSame('l_ssd', $volume->type()->toString());
     }
 
     public function testRemove()
@@ -233,9 +239,9 @@ JSON
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/volumes/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
-                    (string) $request->method() === 'DELETE' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/volumes/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
+                    $request->method()->toString() === 'DELETE' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }));
 
         $this->assertNull($volumes->remove(new Volume\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd')));

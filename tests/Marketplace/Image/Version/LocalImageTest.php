@@ -9,7 +9,8 @@ use Innmind\ScalewaySdk\{
     Image,
     Region,
 };
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
 class LocalImageTest extends TestCase
@@ -27,8 +28,8 @@ class LocalImageTest extends TestCase
         $this->assertSame($id, $image->id());
         $this->assertSame($architecture, $image->architecture());
         $this->assertSame($region, $image->region());
-        $this->assertInstanceOf(SetInterface::class, $image->compatibleCommercialTypes());
+        $this->assertInstanceOf(Set::class, $image->compatibleCommercialTypes());
         $this->assertSame(Name::class, (string) $image->compatibleCommercialTypes()->type());
-        $this->assertSame([$foo, $bar], $image->compatibleCommercialTypes()->toPrimitive());
+        $this->assertSame([$foo, $bar], unwrap($image->compatibleCommercialTypes()));
     }
 }

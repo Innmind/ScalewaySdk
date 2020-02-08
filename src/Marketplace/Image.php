@@ -4,31 +4,37 @@ declare(strict_types = 1);
 namespace Innmind\ScalewaySdk\Marketplace;
 
 use Innmind\ScalewaySdk\Organization;
-use Innmind\TimeContinuum\PointInTimeInterface;
-use Innmind\Url\UrlInterface;
-use Innmind\Immutable\SetInterface;
+use Innmind\TimeContinuum\PointInTime;
+use Innmind\Url\Url;
+use Innmind\Immutable\Set;
 use function Innmind\Immutable\assertSet;
 
 final class Image
 {
-    private $id;
-    private $organization;
-    private $currentPublicVersion;
-    private $versions;
-    private $name;
-    private $categories;
-    private $logo;
-    private $expiresAt;
+    private Image\Id $id;
+    private Organization\Id $organization;
+    private Image\Version $currentPublicVersion;
+    /** @var Set<Image\Version> */
+    private Set $versions;
+    private Image\Name $name;
+    /** @var Set<Image\Category> */
+    private Set $categories;
+    private Url $logo;
+    private ?PointInTime $expiresAt;
 
+    /**
+     * @param Set<Image\Version> $versions
+     * @param Set<Image\Category> $categories
+     */
     public function __construct(
         Image\Id $id,
         Organization\Id $organization,
         Image\Version $currentPublicVersion,
-        SetInterface $versions,
+        Set $versions,
         Image\Name $name,
-        SetInterface $categories,
-        UrlInterface $logo,
-        ?PointInTimeInterface $expiresAt
+        Set $categories,
+        Url $logo,
+        ?PointInTime $expiresAt
     ) {
         assertSet(Image\Version::class, $versions, 4);
         assertSet(Image\Category::class, $categories, 6);
@@ -59,9 +65,9 @@ final class Image
     }
 
     /**
-     * @return SetInterface<Image\Version>
+     * @return Set<Image\Version>
      */
-    public function versions(): SetInterface
+    public function versions(): Set
     {
         return $this->versions;
     }
@@ -72,25 +78,27 @@ final class Image
     }
 
     /**
-     * @return SetInterface<Image\Category>
+     * @return Set<Image\Category>
      */
-    public function categories(): SetInterface
+    public function categories(): Set
     {
         return $this->categories;
     }
 
-    public function logo(): UrlInterface
+    public function logo(): Url
     {
         return $this->logo;
     }
 
     public function expires(): bool
     {
-        return $this->expiresAt instanceof PointInTimeInterface;
+        return $this->expiresAt instanceof PointInTime;
     }
 
-    public function expiresAt(): PointInTimeInterface
+    /** @psalm-suppress InvalidNullableReturnType */
+    public function expiresAt(): PointInTime
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->expiresAt;
     }
 }

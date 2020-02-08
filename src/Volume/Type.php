@@ -8,10 +8,12 @@ use Innmind\ScalewaySdk\Exception\DomainException;
 final class Type
 {
     private const LSSD = 'l_ssd';
+    private const BSSD = 'b_ssd';
 
-    private static $lssd;
+    private static ?self $lssd = null;
+    private static ?self $bssd = null;
 
-    private $value;
+    private string $value;
 
     private function __construct(string $value)
     {
@@ -23,6 +25,8 @@ final class Type
         switch ($value) {
             case self::LSSD:
                 return self::lssd();
+            case self::BSSD:
+                return self::bssd();
         }
 
         throw new DomainException($value);
@@ -30,10 +34,15 @@ final class Type
 
     public static function lssd(): self
     {
-        return self::$lssd ?? self::$lssd = new self(self::LSSD);
+        return self::$lssd ??= new self(self::LSSD);
     }
 
-    public function __toString(): string
+    public static function bssd(): self
+    {
+        return self::$bssd ??= new self(self::BSSD);
+    }
+
+    public function toString(): string
     {
         return $this->value;
     }

@@ -5,10 +5,10 @@ namespace Innmind\ScalewaySdk\Tokens;
 
 final class NewToken
 {
-    private $email;
-    private $password;
-    private $expires;
-    private $twoFaToken;
+    private string $email;
+    private string $password;
+    private bool $expires;
+    private ?string $twoFaToken;
 
     private function __construct(
         string $email,
@@ -58,8 +58,10 @@ final class NewToken
         return \is_string($this->twoFaToken);
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function twoFaToken(): string
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->twoFaToken;
     }
 }

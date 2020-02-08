@@ -16,14 +16,18 @@ use Innmind\ScalewaySdk\{
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Response,
-    Headers\Headers,
+    Headers,
     Header\Link,
     Header\LinkValue,
 };
 use Innmind\Url\Url;
-use Innmind\Filesystem\Stream\StringStream;
+use Innmind\Stream\Readable\Stream;
 use Innmind\Json\Json;
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\{
+    unwrap,
+    first,
+};
 use PHPUnit\Framework\TestCase;
 
 class HttpTest extends TestCase
@@ -51,10 +55,10 @@ class HttpTest extends TestCase
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/servers' &&
-                    (string) $request->method() === 'POST' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
-                    (string) $request->body() === Json::encode([
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers' &&
+                    $request->method()->toString() === 'POST' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
+                    $request->body()->toString() === Json::encode([
                         'name' => 'foobar',
                         'organization' => '000a115d-2852-4b0a-9ce8-47f1134ba95a',
                         'image' => '9956c6a6-607c-4d42-92bc-5f51f7087ae4',
@@ -68,7 +72,7 @@ class HttpTest extends TestCase
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "server": {
         "bootscript": null,
@@ -123,14 +127,14 @@ JSON
         );
 
         $this->assertInstanceOf(Server::class, $server);
-        $this->assertSame('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c', (string) $server->id());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $server->organization());
-        $this->assertSame('foobar', (string) $server->name());
-        $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', (string) $server->image());
-        $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', (string) $server->ip());
+        $this->assertSame('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c', $server->id()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $server->organization()->toString());
+        $this->assertSame('foobar', $server->name()->toString());
+        $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', $server->image()->toString());
+        $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', $server->ip()->toString());
         $this->assertSame(Server\State::stopped(), $server->state());
-        $this->assertSame(['foo', 'bar'], $server->tags()->toPrimitive());
-        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', (string) $server->volumes()->current());
+        $this->assertSame(['foo', 'bar'], unwrap($server->tags()));
+        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', first($server->volumes())->toString());
     }
 
     public function testList()
@@ -144,9 +148,9 @@ JSON
             ->expects($this->at(0))
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/servers' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
@@ -154,13 +158,13 @@ JSON
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::fromString('/servers?page=2&per_page=50'), 'next')
+                    new LinkValue(Url::of('/servers?page=2&per_page=50'), 'next')
                 )
             ));
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "servers": [
         {
@@ -210,15 +214,19 @@ JSON
             ->expects($this->at(1))
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/servers?page=2&per_page=50' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers?page=2&per_page=50' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
             ->expects($this->once())
+            ->method('headers')
+            ->willReturn(Headers::of());
+        $response
+            ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "servers": [
         {
@@ -267,7 +275,7 @@ JSON
 
         $servers = $servers->list();
 
-        $this->assertInstanceOf(SetInterface::class, $servers);
+        $this->assertInstanceOf(Set::class, $servers);
         $this->assertSame(Server::class, (string) $servers->type());
         $this->assertCount(2, $servers);
     }
@@ -283,15 +291,15 @@ JSON
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/servers/3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers/3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "server": {
         "bootscript": null,
@@ -342,17 +350,17 @@ JSON
         $server = $servers->get(new Server\Id('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c'));
 
         $this->assertInstanceOf(Server::class, $server);
-        $this->assertSame('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c', (string) $server->id());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $server->organization());
-        $this->assertSame('foobar', (string) $server->name());
-        $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', (string) $server->image());
-        $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', (string) $server->ip());
+        $this->assertSame('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c', $server->id()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $server->organization()->toString());
+        $this->assertSame('foobar', $server->name()->toString());
+        $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', $server->image()->toString());
+        $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', $server->ip()->toString());
         $this->assertSame(Server\State::stopped(), $server->state());
-        $this->assertSame(['foo', 'bar'], $server->tags()->toPrimitive());
-        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', (string) $server->volumes()->current());
+        $this->assertSame(['foo', 'bar'], unwrap($server->tags()));
+        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', first($server->volumes())->toString());
         $this->assertSame(
             [Server\Action::backup()],
-            $server->allowedActions()->toPrimitive()
+            unwrap($server->allowedActions())
         );
     }
 
@@ -367,9 +375,9 @@ JSON
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/servers/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
-                    (string) $request->method() === 'DELETE' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
+                    $request->method()->toString() === 'DELETE' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }));
 
         $this->assertNull($servers->remove(new Server\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd')));
@@ -386,10 +394,10 @@ JSON
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/servers/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd/action' &&
-                    (string) $request->method() === 'POST' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
-                    (string) $request->body() === '{"action":"poweroff"}';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd/action' &&
+                    $request->method()->toString() === 'POST' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
+                    $request->body()->toString() === '{"action":"poweroff"}';
             }));
 
         $this->assertNull($servers->execute(

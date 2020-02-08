@@ -11,17 +11,18 @@ use Innmind\ScalewaySdk\{
     Image\Architecture,
     Region,
 };
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Response,
-    Headers\Headers,
+    Headers,
     Header\Link,
     Header\LinkValue,
 };
 use Innmind\Url\Url;
-use Innmind\Filesystem\Stream\StringStream;
-use Innmind\Immutable\SetInterface;
+use Innmind\Stream\Readable\Stream;
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\first;
 use PHPUnit\Framework\TestCase;
 
 class HttpTest extends TestCase
@@ -32,7 +33,7 @@ class HttpTest extends TestCase
             Images::class,
             new Http(
                 $this->createMock(Transport::class),
-                $this->createMock(TimeContinuumInterface::class),
+                $this->createMock(Clock::class),
                 new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
             )
         );
@@ -42,16 +43,16 @@ class HttpTest extends TestCase
     {
         $images = new Http(
             $http = $this->createMock(Transport::class),
-            $this->createMock(TimeContinuumInterface::class),
+            $this->createMock(Clock::class),
             new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
         );
         $http
             ->expects($this->at(0))
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://api-marketplace.scaleway.com/images' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://api-marketplace.scaleway.com/images' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
@@ -59,13 +60,13 @@ class HttpTest extends TestCase
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::fromString('/images?page=2&per_page=50'), 'next')
+                    new LinkValue(Url::of('/images?page=2&per_page=50'), 'next')
                 )
             ));
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "images": [
         {
@@ -117,9 +118,9 @@ JSON
             ->expects($this->at(1))
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://api-marketplace.scaleway.com/images?page=2&per_page=50' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://api-marketplace.scaleway.com/images?page=2&per_page=50' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
@@ -127,13 +128,13 @@ JSON
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::fromString('/images?page=2&per_page=50'), 'last')
+                    new LinkValue(Url::of('/images?page=2&per_page=50'), 'last')
                 )
             ));
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "images": [
         {
@@ -218,7 +219,7 @@ JSON
 
         $all = $images->list();
 
-        $this->assertInstanceOf(SetInterface::class, $all);
+        $this->assertInstanceOf(Set::class, $all);
         $this->assertSame(Image::class, (string) $all->type());
         $this->assertCount(2, $all);
     }
@@ -227,22 +228,22 @@ JSON
     {
         $images = new Http(
             $http = $this->createMock(Transport::class),
-            $this->createMock(TimeContinuumInterface::class),
+            $this->createMock(Clock::class),
             new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
         );
         $http
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://api-marketplace.scaleway.com/images/25d37e4e-9674-450c-a8ac-96ec3be9a643' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://api-marketplace.scaleway.com/images/25d37e4e-9674-450c-a8ac-96ec3be9a643' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "image": {
         "valid_until": null,
@@ -326,30 +327,30 @@ JSON
         $image = $images->get(new Image\Id('25d37e4e-9674-450c-a8ac-96ec3be9a643'));
 
         $this->assertInstanceOf(Image::class, $image);
-        $this->assertSame('8f60c5dd-e659-48da-97e3-fb7de42195f5', (string) $image->id());
-        $this->assertSame('6d6b64e5-6bad-4cc6-b7ef-2030884c3e11', (string) $image->organization());
-        $this->assertSame('Arch Linux', (string) $image->name());
-        $this->assertSame('f7696517-bc49-448b-9869-f2c84e7c2a96', (string) $image->currentPublicVersion()->id());
+        $this->assertSame('8f60c5dd-e659-48da-97e3-fb7de42195f5', $image->id()->toString());
+        $this->assertSame('6d6b64e5-6bad-4cc6-b7ef-2030884c3e11', $image->organization()->toString());
+        $this->assertSame('Arch Linux', $image->name()->toString());
+        $this->assertSame('f7696517-bc49-448b-9869-f2c84e7c2a96', $image->currentPublicVersion()->id()->toString());
         $this->assertFalse($image->expires());
         $this->assertSame(
             'https://marketplace-logos.s3.nl-ams.scw.cloud/archlinux.png',
-            (string) $image->logo()
+            $image->logo()->toString(),
         );
         $this->assertCount(1, $image->categories());
         $this->assertCount(1, $image->versions());
-        $this->assertCount(2, $image->versions()->current()->localImages());
-        $this->assertCount(21, $image->versions()->current()->localImages()->current()->compatibleCommercialTypes());
+        $this->assertCount(2, first($image->versions())->localImages());
+        $this->assertCount(21, first(first($image->versions())->localImages())->compatibleCommercialTypes());
         $this->assertSame(
             'f21defd0-9fd9-4fb2-a29a-22844a6be3cd',
-            (string) $image->versions()->current()->localImages()->current()->id()
+            first(first($image->versions())->localImages())->id()->toString()
         );
         $this->assertSame(
             Architecture::x86_64(),
-            $image->versions()->current()->localImages()->current()->architecture()
+            first(first($image->versions())->localImages())->architecture()
         );
         $this->assertSame(
             Region::paris1(),
-            $image->versions()->current()->localImages()->current()->region()
+            first(first($image->versions())->localImages())->region()
         );
     }
 }

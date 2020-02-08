@@ -16,7 +16,7 @@ class RegionTest extends TestCase
         $this->assertInstanceOf(Region::class, Region::paris1());
         $this->assertSame(Region::paris1(), Region::paris1());
         $this->assertSame(Region::paris1(), Region::of('par1'));
-        $this->assertSame('par1', (string) Region::paris1());
+        $this->assertSame('par1', Region::paris1()->toString());
     }
 
     public function testAmsterdam()
@@ -24,7 +24,7 @@ class RegionTest extends TestCase
         $this->assertInstanceOf(Region::class, Region::amsterdam1());
         $this->assertSame(Region::amsterdam1(), Region::amsterdam1());
         $this->assertSame(Region::amsterdam1(), Region::of('ams1'));
-        $this->assertSame('ams1', (string) Region::amsterdam1());
+        $this->assertSame('ams1', Region::amsterdam1()->toString());
     }
 
     public function testThrowWhenInvalidValue()

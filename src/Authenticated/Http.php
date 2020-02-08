@@ -9,17 +9,17 @@ use Innmind\ScalewaySdk\{
     Token,
 };
 use Innmind\HttpTransport\Transport;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 
 final class Http implements Authenticated
 {
-    private $transport;
-    private $clock;
-    private $token;
+    private Transport $transport;
+    private Clock $clock;
+    private Token\Id $token;
 
     public function __construct(
         Transport $transport,
-        TimeContinuumInterface $clock,
+        Clock $clock,
         Token\Id $token
     ) {
         $this->transport = $transport;
@@ -32,7 +32,7 @@ final class Http implements Authenticated
         return new Images\Http(
             $this->transport,
             $region,
-            $this->token
+            $this->token,
         );
     }
 
@@ -41,7 +41,7 @@ final class Http implements Authenticated
         return new IPs\Http(
             $this->transport,
             $region,
-            $this->token
+            $this->token,
         );
     }
 
@@ -50,7 +50,7 @@ final class Http implements Authenticated
         return new Servers\Http(
             $this->transport,
             $region,
-            $this->token
+            $this->token,
         );
     }
 
@@ -59,7 +59,7 @@ final class Http implements Authenticated
         return new Tokens\Http(
             $this->transport,
             $this->clock,
-            $this->token
+            $this->token,
         );
     }
 
@@ -67,7 +67,7 @@ final class Http implements Authenticated
     {
         return new Users\Http(
             $this->transport,
-            $this->token
+            $this->token,
         );
     }
 
@@ -76,7 +76,7 @@ final class Http implements Authenticated
         return new Volumes\Http(
             $this->transport,
             $region,
-            $this->token
+            $this->token,
         );
     }
 
@@ -85,7 +85,7 @@ final class Http implements Authenticated
         return new Marketplace\Http(
             $this->transport,
             $this->clock,
-            $this->token
+            $this->token,
         );
     }
 }

@@ -10,37 +10,38 @@ use Innmind\ScalewaySdk\{
     Authenticated,
 };
 use Innmind\HttpTransport\Transport;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
+use function Innmind\HttpTransport\bootstrap as http;
 
 final class Http implements Scaleway
 {
-    private $transport;
-    private $clock;
-    private $tokens;
-    private $authenticated;
+    private Transport $transport;
+    private Clock $clock;
+    private ?Tokens $tokens = null;
+    private ?Authenticated $authenticated = null;
 
     public function __construct(
         Transport $transport,
-        TimeContinuumInterface $clock
+        Clock $clock
     ) {
-        $this->transport = $transport;
+        $this->transport = http()['throw_on_error']($transport);
         $this->clock = $clock;
     }
 
     public function tokens(): Tokens
     {
-        return $this->tokens ?? $this->tokens = new Tokens\Http(
+        return $this->tokens ??= new Tokens\Http(
             $this->transport,
-            $this->clock
+            $this->clock,
         );
     }
 
     public function authenticated(Token\Id $token): Authenticated
     {
-        return $this->authenticated ?? $this->authenticated = new Authenticated\Http(
+        return $this->authenticated ??= new Authenticated\Http(
             $this->transport,
             $this->clock,
-            $token
+            $token,
         );
     }
 }

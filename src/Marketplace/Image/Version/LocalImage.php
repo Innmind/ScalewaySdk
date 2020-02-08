@@ -8,17 +8,15 @@ use Innmind\ScalewaySdk\{
     Region,
     Marketplace\Product\Server\Name,
 };
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
 
 final class LocalImage
 {
-    private $id;
-    private $architecture;
-    private $region;
-    private $compatibleCommercialTypes;
+    private Image\Id $id;
+    private Image\Architecture $architecture;
+    private Region $region;
+    /** @var Set<Name> */
+    private Set $compatibleCommercialTypes;
 
     public function __construct(
         Image\Id $id,
@@ -29,6 +27,7 @@ final class LocalImage
         $this->id = $id;
         $this->architecture = $architecture;
         $this->region = $region;
+        /** @var Set<Name> */
         $this->compatibleCommercialTypes = Set::of(Name::class, ...$compatibleCommercialTypes);
     }
 
@@ -48,9 +47,9 @@ final class LocalImage
     }
 
     /**
-     * @return SetInterface<string>
+     * @return Set<Name>
      */
-    public function compatibleCommercialTypes(): SetInterface
+    public function compatibleCommercialTypes(): Set
     {
         return $this->compatibleCommercialTypes;
     }

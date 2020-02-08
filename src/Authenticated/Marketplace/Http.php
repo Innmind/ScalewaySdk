@@ -8,18 +8,18 @@ use Innmind\ScalewaySdk\{
     Token,
 };
 use Innmind\HttpTransport\Transport;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 
 final class Http implements Marketplace
 {
-    private $transport;
-    private $clock;
-    private $token;
-    private $images;
+    private Transport $transport;
+    private Clock $clock;
+    private Token\Id $token;
+    private ?Images $images = null;
 
     public function __construct(
         Transport $transport,
-        TimeContinuumInterface $clock,
+        Clock $clock,
         Token\Id $token
     ) {
         $this->transport = $transport;
@@ -29,10 +29,10 @@ final class Http implements Marketplace
 
     public function images(): Images
     {
-        return $this->images ?? $this->images = new Images\Http(
+        return $this->images ??= new Images\Http(
             $this->transport,
             $this->clock,
-            $this->token
+            $this->token,
         );
     }
 }

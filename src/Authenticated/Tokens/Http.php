@@ -9,34 +9,29 @@ use Innmind\ScalewaySdk\{
     User,
     Http\Header\AuthToken,
 };
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
-    Headers\Headers,
+    Message\Method,
+    ProtocolVersion,
+    Headers,
     Header\LinkValue,
 };
-use Innmind\Url\{
-    UrlInterface,
-    Url,
-};
+use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\first;
 
 final class Http implements Tokens
 {
-    private $fulfill;
-    private $clock;
-    private $token;
+    private Transport $fulfill;
+    private Clock $clock;
+    private Token\Id $token;
 
     public function __construct(
         Transport $fulfill,
-        TimeContinuumInterface $clock,
+        Clock $clock,
         Token\Id $token
     ) {
         $this->fulfill = $fulfill;
@@ -44,12 +39,10 @@ final class Http implements Tokens
         $this->token = $token;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function list(): SetInterface
+    public function list(): Set
     {
-        $url = Url::fromString('https://account.scaleway.com/tokens');
+        $url = Url::of('https://account.scaleway.com/tokens');
+        /** @var list<array{id: string, user_id: string, creation_date: string, expires: string|null}> */
         $tokens = [];
 
         do {
@@ -58,17 +51,20 @@ final class Http implements Tokens
                 Method::get(),
                 new ProtocolVersion(2, 0),
                 Headers::of(
-                    new AuthToken($this->token)
-                )
+                    new AuthToken($this->token),
+                ),
             ));
 
-            $tokens = \array_merge(
-                $tokens,
-                Json::decode((string) $response->body())['tokens']
-            );
+            /** @var array{tokens: list<array{id: string, user_id: string, creation_date: string, expires: string|null}>} */
+            $body = Json::decode($response->body()->toString());
+            $tokens = \array_merge($tokens, $body['tokens']);
             $next = null;
 
-            if ($response->headers()->has('Link')) {
+            if ($response->headers()->contains('Link')) {
+                /**
+                 * @psalm-suppress ArgumentTypeCoercion
+                 * @var Set<LinkValue>
+                 */
                 $next = $response
                     ->headers()
                     ->get('Link')
@@ -79,17 +75,18 @@ final class Http implements Tokens
 
                 if ($next->size() === 1) {
                     $next = $url
-                        ->withPath($next->current()->url()->path())
-                        ->withQuery($next->current()->url()->query());
+                        ->withPath(first($next)->url()->path())
+                        ->withQuery(first($next)->url()->query());
                     $url = $next;
                 }
             }
-        } while ($next instanceof UrlInterface);
+        } while ($next instanceof Url);
 
+        /** @var Set<Token> */
         $set = Set::of(Token::class);
 
         foreach ($tokens as $token) {
-            $set = $set->add($this->decode($token));
+            $set = ($set)($this->decode($token));
         }
 
         return $set;
@@ -98,38 +95,42 @@ final class Http implements Tokens
     public function get(Token\Id $id): Token
     {
         $response = ($this->fulfill)(new Request(
-            Url::fromString("https://account.scaleway.com/tokens/$id"),
+            Url::of("https://account.scaleway.com/tokens/{$id->toString()}"),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
 
-        $token = Json::decode((string) $response->body())['token'];
+        /** @var array{token: array{id: string, user_id: string, creation_date: string, expires: string|null}} */
+        $body = Json::decode($response->body()->toString());
 
-        return $this->decode($token);
+        return $this->decode($body['token']);
     }
 
     public function remove(Token\Id $id): void
     {
         ($this->fulfill)(new Request(
-            Url::fromString("https://account.scaleway.com/tokens/$id"),
+            Url::of("https://account.scaleway.com/tokens/{$id->toString()}"),
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
     }
 
+    /**
+     * @param array{id: string, user_id: string, creation_date: string, expires: string|null} $token
+     */
     private function decode(array $token): Token
     {
         return new Token(
             new Token\Id($token['id']),
             new User\Id($token['user_id']),
             $this->clock->at($token['creation_date']),
-            \is_string($token['expires']) ? $this->clock->at($token['expires']) : null
+            \is_string($token['expires']) ? $this->clock->at($token['expires']) : null,
         );
     }
 }

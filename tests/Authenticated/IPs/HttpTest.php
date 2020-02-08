@@ -15,14 +15,15 @@ use Innmind\ScalewaySdk\{
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Response,
-    Headers\Headers,
+    Headers,
     Header\Link,
     Header\LinkValue,
 };
 use Innmind\Url\Url;
-use Innmind\Filesystem\Stream\StringStream;
+use Innmind\Stream\Readable\Stream;
 use Innmind\Json\Json;
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
 class HttpTest extends TestCase
@@ -50,10 +51,10 @@ class HttpTest extends TestCase
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/ips' &&
-                    (string) $request->method() === 'POST' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
-                    (string) $request->body() === Json::encode([
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/ips' &&
+                    $request->method()->toString() === 'POST' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
+                    $request->body()->toString() === Json::encode([
                         'organization' => '000a115d-2852-4b0a-9ce8-47f1134ba95a',
                     ]);
             }))
@@ -61,7 +62,7 @@ class HttpTest extends TestCase
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "ip": {
         "id": "c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd",
@@ -76,9 +77,9 @@ JSON
         $ip = $ips->create(new Organization\Id('000a115d-2852-4b0a-9ce8-47f1134ba95a'));
 
         $this->assertInstanceOf(IP::class, $ip);
-        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $ip->id());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $ip->organization());
-        $this->assertSame('::1', (string) $ip->address());
+        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', $ip->id()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $ip->organization()->toString());
+        $this->assertSame('::1', $ip->address()->toString());
         $this->assertFalse($ip->attachedToAServer());
     }
 
@@ -93,9 +94,9 @@ JSON
             ->expects($this->at(0))
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/ips' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/ips' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
@@ -103,13 +104,13 @@ JSON
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::fromString('/ips?page=2&per_page=50'), 'next')
+                    new LinkValue(Url::of('/ips?page=2&per_page=50'), 'next')
                 )
             ));
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "ips": [
         {
@@ -126,15 +127,19 @@ JSON
             ->expects($this->at(1))
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/ips?page=2&per_page=50' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/ips?page=2&per_page=50' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
             ->expects($this->once())
+            ->method('headers')
+            ->willReturn(Headers::of());
+        $response
+            ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "ips": [
         {
@@ -153,12 +158,13 @@ JSON
 
         $ips = $ips->list();
 
-        $this->assertInstanceOf(SetInterface::class, $ips);
+        $this->assertInstanceOf(Set::class, $ips);
         $this->assertSame(IP::class, (string) $ips->type());
         $this->assertCount(2, $ips);
-        $this->assertFalse($ips->current()->attachedToAServer());
-        $ips->next();
-        $this->assertTrue($ips->current()->attachedToAServer());
+        $ips = unwrap($ips);
+        $this->assertFalse(\current($ips)->attachedToAServer());
+        \next($ips);
+        $this->assertTrue(\current($ips)->attachedToAServer());
     }
 
     public function testGet()
@@ -172,15 +178,15 @@ JSON
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/ips/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/ips/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "ip": {
         "id": "c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd",
@@ -196,9 +202,9 @@ JSON
         $ip = $ips->get(new IP\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd'));
 
         $this->assertInstanceOf(IP::class, $ip);
-        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $ip->id());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $ip->organization());
-        $this->assertSame('127.0.0.1', (string) $ip->address());
+        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', $ip->id()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $ip->organization()->toString());
+        $this->assertSame('127.0.0.1', $ip->address()->toString());
     }
 
     public function testRemove()
@@ -212,9 +218,9 @@ JSON
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/ips/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
-                    (string) $request->method() === 'DELETE' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/ips/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
+                    $request->method()->toString() === 'DELETE' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }));
 
         $this->assertNull($ips->remove(new IP\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd')));
@@ -231,10 +237,10 @@ JSON
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://cp-par1.scaleway.com/ips/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
-                    (string) $request->method() === 'PATCH' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
-                    (string) $request->body() === Json::encode([
+                return $request->url()->toString() === 'https://cp-par1.scaleway.com/ips/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
+                    $request->method()->toString() === 'PATCH' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
+                    $request->body()->toString() === Json::encode([
                         'server' => '49083202-b911-4a4a-b367-6f36c7f1ac4f',
                     ]);
             }))
@@ -242,7 +248,7 @@ JSON
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "ip": {
         "id": "c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd",
@@ -263,10 +269,10 @@ JSON
         );
 
         $this->assertInstanceOf(IP::class, $ip);
-        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', (string) $ip->id());
-        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', (string) $ip->organization());
-        $this->assertSame('::1', (string) $ip->address());
+        $this->assertSame('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd', $ip->id()->toString());
+        $this->assertSame('000a115d-2852-4b0a-9ce8-47f1134ba95a', $ip->organization()->toString());
+        $this->assertSame('::1', $ip->address()->toString());
         $this->assertTrue($ip->attachedToAServer());
-        $this->assertSame('49083202-b911-4a4a-b367-6f36c7f1ac4f', (string) $ip->server());
+        $this->assertSame('49083202-b911-4a4a-b367-6f36c7f1ac4f', $ip->server()->toString());
     }
 }

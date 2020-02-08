@@ -15,9 +15,18 @@ class TypeTest extends TestCase
     {
         $this->assertInstanceOf(Type::class, Type::lssd());
         $this->assertSame(Type::lssd(), Type::lssd());
-        $this->assertSame('l_ssd', (string) Type::lssd());
+        $this->assertSame('l_ssd', Type::lssd()->toString());
         $this->assertInstanceOf(Type::class, Type::of('l_ssd'));
-        $this->assertSame('l_ssd', (string) Type::of('l_ssd'));
+        $this->assertSame('l_ssd', Type::of('l_ssd')->toString());
+    }
+
+    public function testBssd()
+    {
+        $this->assertInstanceOf(Type::class, Type::bssd());
+        $this->assertSame(Type::bssd(), Type::bssd());
+        $this->assertSame('b_ssd', Type::bssd()->toString());
+        $this->assertInstanceOf(Type::class, Type::of('b_ssd'));
+        $this->assertSame('b_ssd', Type::of('b_ssd')->toString());
     }
 
     public function testThrowWhenUnknownType()

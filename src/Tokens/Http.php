@@ -11,23 +11,22 @@ use Innmind\ScalewaySdk\{
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
-    Headers\Headers,
+    Message\Method,
+    ProtocolVersion,
+    Headers,
     Header\ContentType,
-    Header\ContentTypeValue,
 };
 use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Filesystem\Stream\StringStream;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\Stream\Readable\Stream;
+use Innmind\TimeContinuum\Clock;
 
 final class Http implements Tokens
 {
-    private $fulfill;
-    private $clock;
+    private Transport $fulfill;
+    private Clock $clock;
 
-    public function __construct(Transport $fulfill, TimeContinuumInterface $clock)
+    public function __construct(Transport $fulfill, Clock $clock)
     {
         $this->fulfill = $fulfill;
         $this->clock = $clock;
@@ -46,24 +45,24 @@ final class Http implements Tokens
         }
 
         $response = ($this->fulfill)(new Request(
-            Url::fromString('https://account.scaleway.com/tokens'),
+            Url::of('https://account.scaleway.com/tokens'),
             Method::post(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new ContentType(
-                    new ContentTypeValue('application', 'json')
-                )
+                ContentType::of('application', 'json'),
             ),
-            new StringStream(Json::encode($payload))
+            Stream::ofContent(Json::encode($payload)),
         ));
 
-        $data = Json::decode((string) $response->body())['token'];
+        /** @var array{token: array{id: string, user_id: string, creation_date: string, expires: string|null}} */
+        $body = Json::decode($response->body()->toString());
+        $data = $body['token'];
 
         return new Token(
             new Token\Id($data['id']),
             new User\Id($data['user_id']),
             $this->clock->at($data['creation_date']),
-            \is_string($data['expires']) ? $this->clock->at($data['expires']) : null
+            \is_string($data['expires']) ? $this->clock->at($data['expires']) : null,
         );
     }
 }

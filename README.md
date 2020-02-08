@@ -1,10 +1,8 @@
 # Scaleway SDK (unofficial)
 
-| `develop` |
-|-----------|
-| [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/?branch=develop) |
-| [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/?branch=develop) |
-| [![Build Status](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/badges/build.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ScalewaySdk/build-status/develop) |
+[![Build Status](https://github.com/Innmind/ScalewaySdk/workflows/CI/badge.svg)](https://github.com/Innmind/ScalewaySdk/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/Innmind/ScalewaySdk/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/ScalewaySdk)
+[![Type Coverage](https://shepherd.dev/github/Innmind/ScalewaySdk/coverage.svg)](https://shepherd.dev/github/Innmind/ScalewaySdk)
 
 This is a sdk for the [Scaleway](https://scaleway.com/) API.
 
@@ -26,6 +24,10 @@ use Innmind\ScalewaySdk\{
     Marketplace,
     ChooseImage,
 };
+use function Innmind\Immutable\{
+    first,
+    unwrap,
+};
 
 $os = Factory::build();
 $sdk = bootstrap($os->remote()->http(), $os->clock());
@@ -34,23 +36,23 @@ $token = $sdk
     ->create(NewToken::temporary(
         'foo@example.com',
         'some secret password',
-        '2FACOD' // if 2FA enabled on your account
+        '2FACOD', // if 2FA enabled on your account
     ));
-$organization = $sdk
+$organizations = $sdk
     ->authenticated($token->id())
     ->users()
     ->get($token->user())
-    ->organizations()
-    ->current();
+    ->organizations();
+$organization = first($organizations);
 $servers = $sdk
     ->authenticated($token->id())
     ->servers(Region::paris1());
 $chooseImage = new ChooseImage(
-    ...$sdk
+    ...unwrap($sdk
         ->authenticated($token->id())
         ->marketplace()
         ->images()
-        ->list()
+        ->list()),
 );
 $server = $servers->create(
     new Server\Name('my-server'),
@@ -58,16 +60,16 @@ $server = $servers->create(
     $chooseImage(
         Region::paris1(),
         new Marketplace\Image\Name('CentOS 7.6'),
-        new Marketplace\Product\Server\Name('GP1-XS')
+        new Marketplace\Product\Server\Name('GP1-XS'),
     ),
     $servers
         ->authenticated($token->id())
         ->ips(Region::paris1())
-        ->create($organization)
+        ->create($organization),
 );
 $servers->execute(
     $server->id(),
-    Server\Action::powerOn()
+    Server\Action::powerOn(),
 );
 ```
 

@@ -12,14 +12,13 @@ use Innmind\ScalewaySdk\{
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Response,
-    Headers\Headers,
+    Headers,
     Header\Link,
     Header\LinkValue,
 };
 use Innmind\Url\Url;
-use Innmind\Filesystem\Stream\StringStream;
+use Innmind\Stream\Readable\Stream;
 use Innmind\Json\Json;
-use Innmind\Immutable\SetInterface;
 use PHPUnit\Framework\TestCase;
 
 class HttpTest extends TestCase
@@ -45,15 +44,15 @@ class HttpTest extends TestCase
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://account.scaleway.com/users/25d37e4e-9674-450c-a8ac-96ec3be9a643' &&
-                    (string) $request->method() === 'GET' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                return $request->url()->toString() === 'https://account.scaleway.com/users/25d37e4e-9674-450c-a8ac-96ec3be9a643' &&
+                    $request->method()->toString() === 'GET' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
             }))
             ->willReturn($response = $this->createMock(Response::class));
         $response
             ->expects($this->once())
             ->method('body')
-            ->willReturn(new StringStream(<<<JSON
+            ->willReturn(Stream::ofContent(<<<JSON
 {
     "user": {
         "email": "jsnow@got.com",
@@ -82,7 +81,7 @@ JSON
         $user = $users->get(new User\Id('25d37e4e-9674-450c-a8ac-96ec3be9a643'));
 
         $this->assertInstanceOf(User::class, $user);
-        $this->assertSame('25d37e4e-9674-450c-a8ac-96ec3be9a643', (string) $user->id());
+        $this->assertSame('25d37e4e-9674-450c-a8ac-96ec3be9a643', $user->id()->toString());
         $this->assertSame('jsnow@got.com', $user->email());
         $this->assertSame('John', $user->firstname());
         $this->assertSame('Snow', $user->lastname());
@@ -101,10 +100,10 @@ JSON
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request): bool {
-                return (string) $request->url() === 'https://account.scaleway.com/users/25d37e4e-9674-450c-a8ac-96ec3be9a643' &&
-                    (string) $request->method() === 'PATCH' &&
-                    (string) $request->headers()->get('x-auth-token') === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
-                    (string) $request->body() === Json::encode([
+                return $request->url()->toString() === 'https://account.scaleway.com/users/25d37e4e-9674-450c-a8ac-96ec3be9a643' &&
+                    $request->method()->toString() === 'PATCH' &&
+                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
+                    $request->body()->toString() === Json::encode([
                         'ssh_public_keys' => [
                             [
                                 'key' => 'foo',

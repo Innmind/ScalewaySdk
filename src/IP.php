@@ -7,10 +7,10 @@ use Innmind\IP\IP as Address;
 
 final class IP
 {
-    private $id;
-    private $address;
-    private $organization;
-    private $server;
+    private IP\Id $id;
+    private Address $address;
+    private Organization\Id $organization;
+    private ?Server\Id $server;
 
     public function __construct(
         IP\Id $id,
@@ -44,8 +44,10 @@ final class IP
         return $this->server instanceof Server\Id;
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function server(): Server\Id
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->server;
     }
 }

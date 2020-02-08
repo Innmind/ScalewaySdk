@@ -18,9 +18,9 @@ class ArchitectureTest extends TestCase
     {
         $this->assertInstanceOf(Architecture::class, Architecture::$name());
         $this->assertSame(Architecture::$name(), Architecture::$name());
-        $this->assertSame($value, (string) Architecture::$name());
+        $this->assertSame($value, Architecture::$name()->toString());
         $this->assertInstanceOf(Architecture::class, Architecture::of($value));
-        $this->assertSame($value, (string) Architecture::of($value));
+        $this->assertSame($value, Architecture::of($value)->toString());
     }
 
     public function testThrowWhenUnknownValue()

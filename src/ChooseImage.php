@@ -7,17 +7,20 @@ use Innmind\ScalewaySdk\{
     Marketplace\Image\Version\LocalImage,
     Exception\ImageCannotBeDetermined,
 };
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\{
+    first,
+    unwrap,
 };
 
 final class ChooseImage
 {
-    private $images;
+    /** @var Set<Marketplace\Image> */
+    private Set $images;
 
     public function __construct(Marketplace\Image ...$images)
     {
+        /** @var Set<Marketplace\Image> */
         $this->images = Set::of(Marketplace\Image::class, ...$images);
     }
 
@@ -26,33 +29,32 @@ final class ChooseImage
         Marketplace\Image\Name $image,
         Marketplace\Product\Server\Name $server
     ): Image\Id {
+        /** @var Set<LocalImage> */
         $ids = $this
             ->images
             ->filter(static function(Marketplace\Image $marketplace) use ($image): bool {
-                return (string) $marketplace->name() === (string) $image;
+                return $marketplace->name()->toString() === $image->toString();
             })
-            ->reduce(
-                Set::of(LocalImage::class),
-                static function(SetInterface $localImages, Marketplace\Image $image): SetInterface {
-                    return $localImages->merge(
-                        $image->currentPublicVersion()->localImages()
-                    );
-                }
+            ->toSetOf(
+                LocalImage::class,
+                static function(Marketplace\Image $image): \Generator {
+                    yield from unwrap($image->currentPublicVersion()->localImages());
+                },
             )
             ->filter(static function(LocalImage $localImage) use ($region, $server): bool {
                 return $localImage->region() === $region &&
-                    $localImage
+                    !$localImage
                         ->compatibleCommercialTypes()
                         ->filter(static function($type) use ($server): bool {
-                            return (string) $type === (string) $server;
+                            return $type->toString() === $server->toString();
                         })
-                        ->size() > 0;
+                        ->empty();
             });
 
         if ($ids->size() !== 1) {
             throw new ImageCannotBeDetermined;
         }
 
-        return $ids->current()->id();
+        return first($ids)->id();
     }
 }
