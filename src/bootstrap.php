@@ -12,7 +12,7 @@ function bootstrap(
     TimeContinuumInterface $clock
 ): Scaleway {
     return new Scaleway\Http(
-        http()['throw_on_error']($transport),
+        $transport,
         $clock,
     );
 }
