@@ -60,19 +60,15 @@ final class Http implements IPs
             ),
             Stream::ofContent(Json::encode([
                 'organization' => $organization->toString(),
-            ]))
+            ])),
         ));
 
         /** @var array{ip: array{address: string, id: string, organization: string, server: ?array{id: string}}} */
         $body = Json::decode($response->body()->toString());
-        $ip = $body['ip'];
 
-        return $this->decode($ip);
+        return $this->decode($body['ip']);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function list(): Set
     {
         $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips");
@@ -85,16 +81,13 @@ final class Http implements IPs
                 Method::get(),
                 new ProtocolVersion(2, 0),
                 Headers::of(
-                    new AuthToken($this->token)
-                )
+                    new AuthToken($this->token),
+                ),
             ));
 
             /** @var array{ips: list<array{address: string, id: string, organization: string, server: ?array{id: string}}>} */
             $body = Json::decode($response->body()->toString());
-            $ips = \array_merge(
-                $ips,
-                $body['ips'],
-            );
+            $ips = \array_merge($ips, $body['ips']);
             $next = null;
 
             if ($response->headers()->contains('Link')) {
@@ -136,15 +129,14 @@ final class Http implements IPs
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
 
         /** @var array{ip: array{address: string, id: string, organization: string, server: ?array{id: string}}} */
         $body = Json::decode($response->body()->toString());
-        $ip = $body['ip'];
 
-        return $this->decode($ip);
+        return $this->decode($body['ip']);
     }
 
     public function remove(IP\Id $id): void
@@ -154,8 +146,8 @@ final class Http implements IPs
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
     }
 

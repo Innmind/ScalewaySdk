@@ -62,7 +62,7 @@ final class Http implements Tokens
             new Token\Id($data['id']),
             new User\Id($data['user_id']),
             $this->clock->at($data['creation_date']),
-            \is_string($data['expires']) ? $this->clock->at($data['expires']) : null
+            \is_string($data['expires']) ? $this->clock->at($data['expires']) : null,
         );
     }
 }

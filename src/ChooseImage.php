@@ -8,7 +8,10 @@ use Innmind\ScalewaySdk\{
     Exception\ImageCannotBeDetermined,
 };
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\first;
+use function Innmind\Immutable\{
+    first,
+    unwrap,
+};
 
 final class ChooseImage
 {
@@ -32,22 +35,20 @@ final class ChooseImage
             ->filter(static function(Marketplace\Image $marketplace) use ($image): bool {
                 return $marketplace->name()->toString() === $image->toString();
             })
-            ->reduce(
-                Set::of(LocalImage::class),
-                static function(Set $localImages, Marketplace\Image $image): Set {
-                    return $localImages->merge(
-                        $image->currentPublicVersion()->localImages()
-                    );
-                }
+            ->toSetOf(
+                LocalImage::class,
+                static function(Marketplace\Image $image): \Generator {
+                    yield from unwrap($image->currentPublicVersion()->localImages());
+                },
             )
             ->filter(static function(LocalImage $localImage) use ($region, $server): bool {
                 return $localImage->region() === $region &&
-                    $localImage
+                    !$localImage
                         ->compatibleCommercialTypes()
                         ->filter(static function($type) use ($server): bool {
                             return $type->toString() === $server->toString();
                         })
-                        ->size() > 0;
+                        ->empty();
             });
 
         if ($ids->size() !== 1) {

@@ -39,9 +39,6 @@ final class Http implements Tokens
         $this->token = $token;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function list(): Set
     {
         $url = Url::of('https://account.scaleway.com/tokens');
@@ -54,16 +51,13 @@ final class Http implements Tokens
                 Method::get(),
                 new ProtocolVersion(2, 0),
                 Headers::of(
-                    new AuthToken($this->token)
-                )
+                    new AuthToken($this->token),
+                ),
             ));
 
             /** @var array{tokens: list<array{id: string, user_id: string, creation_date: string, expires: string|null}>} */
             $body = Json::decode($response->body()->toString());
-            $tokens = \array_merge(
-                $tokens,
-                $body['tokens'],
-            );
+            $tokens = \array_merge($tokens, $body['tokens']);
             $next = null;
 
             if ($response->headers()->contains('Link')) {
@@ -105,15 +99,14 @@ final class Http implements Tokens
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
 
         /** @var array{token: array{id: string, user_id: string, creation_date: string, expires: string|null}} */
         $body = Json::decode($response->body()->toString());
-        $token = $body['token'];
 
-        return $this->decode($token);
+        return $this->decode($body['token']);
     }
 
     public function remove(Token\Id $id): void
@@ -123,8 +116,8 @@ final class Http implements Tokens
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
     }
 
@@ -137,7 +130,7 @@ final class Http implements Tokens
             new Token\Id($token['id']),
             new User\Id($token['user_id']),
             $this->clock->at($token['creation_date']),
-            \is_string($token['expires']) ? $this->clock->at($token['expires']) : null
+            \is_string($token['expires']) ? $this->clock->at($token['expires']) : null,
         );
     }
 }

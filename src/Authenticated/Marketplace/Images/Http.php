@@ -42,9 +42,6 @@ final class Http implements Images
         $this->token = $token;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function list(): Set
     {
         $url = Url::of("https://api-marketplace.scaleway.com/images");
@@ -57,16 +54,13 @@ final class Http implements Images
                 Method::get(),
                 new ProtocolVersion(2, 0),
                 Headers::of(
-                    new AuthToken($this->token)
-                )
+                    new AuthToken($this->token),
+                ),
             ));
 
             /** @var array{images: list<array{id: string, name: string, logo: string, categories: list<string>, valid_until: string|null, organization: array{id: string}, current_public_version: string, versions: list<array{id: string, local_images: list<array{id: string, arch: string, zone: string, compatible_commercial_types: list<string>}>}>}>} */
             $body = Json::decode($response->body()->toString());
-            $images = \array_merge(
-                $images,
-                $body['images'],
-            );
+            $images = \array_merge($images, $body['images']);
             $next = null;
 
             if ($response->headers()->contains('Link')) {
@@ -108,15 +102,14 @@ final class Http implements Images
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
 
         /** @var array{image: array{id: string, name: string, logo: string, categories: list<string>, valid_until: string|null, organization: array{id: string}, current_public_version: string, versions: list<array{id: string, local_images: list<array{id: string, arch: string, zone: string, compatible_commercial_types: list<string>}>}>}} */
         $body = Json::decode($response->body()->toString());
-        $image = $body['image'];
 
-        return $this->decode($image);
+        return $this->decode($body['image']);
     }
 
     /**
@@ -138,17 +131,16 @@ final class Http implements Images
                             Region::of($image['zone']),
                             ...\array_map(static function(string $name) {
                                 return new Marketplace\Product\Server\Name($name);
-                            }, $image['compatible_commercial_types'])
+                            }, $image['compatible_commercial_types']),
                         );
-                    }, $version['local_images'])
+                    }, $version['local_images']),
                 ));
             },
-            Set::of(Marketplace\Image\Version::class)
+            Set::of(Marketplace\Image\Version::class),
         );
-        $currentPublicVersion = first($versions
-            ->filter(static function($version) use ($image): bool {
-                return $version->id()->toString() === $image['current_public_version'];
-            }));
+        $currentPublicVersion = first($versions->filter(
+            static fn($version): bool => $version->id()->toString() === $image['current_public_version'],
+        ));
 
         /** @var Set<Marketplace\Image\Category> */
         $categories = \array_reduce(
@@ -156,7 +148,7 @@ final class Http implements Images
             static function(Set $categories, string $category): Set {
                 return $categories->add(Marketplace\Image\Category::of($category));
             },
-            Set::of(Marketplace\Image\Category::class)
+            Set::of(Marketplace\Image\Category::class),
         );
 
         return new Marketplace\Image(
@@ -167,7 +159,7 @@ final class Http implements Images
             new Marketplace\Image\Name($image['name']),
             $categories,
             Url::of($image['logo']),
-            \is_string($image['valid_until']) ? $this->clock->at($image['valid_until']) : null
+            \is_string($image['valid_until']) ? $this->clock->at($image['valid_until']) : null,
         );
     }
 }

@@ -32,7 +32,7 @@ final class Http implements Marketplace
         return $this->images ??= new Images\Http(
             $this->transport,
             $this->clock,
-            $this->token
+            $this->token,
         );
     }
 }

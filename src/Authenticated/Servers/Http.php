@@ -68,19 +68,15 @@ final class Http implements Servers
                 'dynamic_ip_required' => false,
                 'enable_ipv6' => true,
                 'public_ip' => $ip->toString(),
-            ]))
+            ])),
         ));
 
         /** @var array{server: array{id: string, organization: string, name: string, image: array{id: string}, public_ip: array{id: string}, state: string, allowed_actions?: list<string>, tags: list<string>, volumes: list<array{id: string}>}} */
         $body = Json::decode($response->body()->toString());
-        $server = $body['server'];
 
-        return $this->decode($server);
+        return $this->decode($body['server']);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function list(): Set
     {
         $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers");
@@ -93,16 +89,13 @@ final class Http implements Servers
                 Method::get(),
                 new ProtocolVersion(2, 0),
                 Headers::of(
-                    new AuthToken($this->token)
-                )
+                    new AuthToken($this->token),
+                ),
             ));
 
             /** @var array{servers: list<array{id: string, organization: string, name: string, image: array{id: string}, public_ip: array{id: string}, state: string, allowed_actions?: list<string>, tags: list<string>, volumes: list<array{id: string}>}>} */
             $body = Json::decode($response->body()->toString());
-            $servers = \array_merge(
-                $servers,
-                $body['servers'],
-            );
+            $servers = \array_merge($servers, $body['servers']);
             $next = null;
 
             if ($response->headers()->contains('Link')) {
@@ -144,15 +137,14 @@ final class Http implements Servers
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
 
         /** @var array{server: array{id: string, organization: string, name: string, image: array{id: string}, public_ip: array{id: string}, state: string, allowed_actions?: list<string>, tags: list<string>, volumes: list<array{id: string}>}} */
         $body = Json::decode($response->body()->toString());
-        $server = $body['server'];
 
-        return $this->decode($server);
+        return $this->decode($body['server']);
     }
 
     public function remove(Server\Id $id): void
@@ -162,8 +154,8 @@ final class Http implements Servers
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
     }
 
@@ -179,7 +171,7 @@ final class Http implements Servers
             ),
             Stream::ofContent(Json::encode([
                 'action' => $action->toString(),
-            ]))
+            ])),
         ));
     }
 

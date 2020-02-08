@@ -43,8 +43,8 @@ final class Http implements Users
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
 
         /** @var array{user: array{id: string, email: string, firstname: string, lastname: string, fullname: string, ssh_public_keys?: list<array{key: string, description: string|null}>, organizations?: list<array{id: string}>}} */
@@ -58,13 +58,13 @@ final class Http implements Users
         foreach ($user['ssh_public_keys'] ?? [] as $key) {
             $keys = ($keys)(new User\SshKey(
                 $key['key'],
-                $key['description']
+                $key['description'],
             ));
         }
 
         foreach ($user['organizations'] ?? [] as $organization) {
             $organizations = ($organizations)(new Organization\Id(
-                $organization['id']
+                $organization['id'],
             ));
         }
 
@@ -75,7 +75,7 @@ final class Http implements Users
             $user['lastname'],
             $user['fullname'],
             $keys,
-            $organizations
+            $organizations,
         );
     }
 
@@ -96,7 +96,7 @@ final class Http implements Users
                         'description' => $key->hasDescription() ? $key->description() : null,
                     ];
                 }, $keys),
-            ]))
+            ])),
         ));
     }
 }

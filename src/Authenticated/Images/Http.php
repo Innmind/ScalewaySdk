@@ -40,9 +40,6 @@ final class Http implements Images
         $this->token = $token;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function list(): Set
     {
         $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/images");
@@ -55,16 +52,13 @@ final class Http implements Images
                 Method::get(),
                 new ProtocolVersion(2, 0),
                 Headers::of(
-                    new AuthToken($this->token)
-                )
+                    new AuthToken($this->token),
+                ),
             ));
 
             /** @var array{images: list<array{id: string, organization: string, name: string, arch: string, public: bool}>} */
             $body = Json::decode($response->body()->toString());
-            $images = \array_merge(
-                $images,
-                $body['images'],
-            );
+            $images = \array_merge($images, $body['images']);
             $next = null;
 
             if ($response->headers()->contains('Link')) {
@@ -106,15 +100,14 @@ final class Http implements Images
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
 
         /** @var array{image: array{id: string, organization: string, name: string, arch: string, public: bool}} */
         $body = Json::decode($response->body()->toString());
-        $image = $body['image'];
 
-        return $this->decode($image);
+        return $this->decode($body['image']);
     }
 
     /**
@@ -127,7 +120,7 @@ final class Http implements Images
             new Organization\Id($image['organization']),
             new Image\Name($image['name']),
             Image\Architecture::of($image['arch']),
-            $image['public']
+            $image['public'],
         );
     }
 }

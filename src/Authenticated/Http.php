@@ -32,7 +32,7 @@ final class Http implements Authenticated
         return new Images\Http(
             $this->transport,
             $region,
-            $this->token
+            $this->token,
         );
     }
 
@@ -41,7 +41,7 @@ final class Http implements Authenticated
         return new IPs\Http(
             $this->transport,
             $region,
-            $this->token
+            $this->token,
         );
     }
 
@@ -50,7 +50,7 @@ final class Http implements Authenticated
         return new Servers\Http(
             $this->transport,
             $region,
-            $this->token
+            $this->token,
         );
     }
 
@@ -59,7 +59,7 @@ final class Http implements Authenticated
         return new Tokens\Http(
             $this->transport,
             $this->clock,
-            $this->token
+            $this->token,
         );
     }
 
@@ -67,7 +67,7 @@ final class Http implements Authenticated
     {
         return new Users\Http(
             $this->transport,
-            $this->token
+            $this->token,
         );
     }
 
@@ -76,7 +76,7 @@ final class Http implements Authenticated
         return new Volumes\Http(
             $this->transport,
             $region,
-            $this->token
+            $this->token,
         );
     }
 
@@ -85,7 +85,7 @@ final class Http implements Authenticated
         return new Marketplace\Http(
             $this->transport,
             $this->clock,
-            $this->token
+            $this->token,
         );
     }
 }

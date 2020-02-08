@@ -62,19 +62,15 @@ final class Http implements Volumes
                 'organization' => $organization->toString(),
                 'size' => $size->toInt(),
                 'type' => $type->toString(),
-            ]))
+            ])),
         ));
 
         /** @var array{volume: array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}} */
         $body = Json::decode($response->body()->toString());
-        $volume = $body['volume'];
 
-        return $this->decode($volume);
+        return $this->decode($body['volume']);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function list(): Set
     {
         $url = Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes");
@@ -87,8 +83,8 @@ final class Http implements Volumes
                 Method::get(),
                 new ProtocolVersion(2, 0),
                 Headers::of(
-                    new AuthToken($this->token)
-                )
+                    new AuthToken($this->token),
+                ),
             ));
 
             /** @var array{volumes: list<array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}>} */
@@ -138,15 +134,14 @@ final class Http implements Volumes
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
 
         /** @var array{volume: array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}} */
         $body = Json::decode($response->body()->toString());
-        $volume = $body['volume'];
 
-        return $this->decode($volume);
+        return $this->decode($body['volume']);
     }
 
     public function remove(Volume\Id $id): void
@@ -156,8 +151,8 @@ final class Http implements Volumes
             Method::delete(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                new AuthToken($this->token)
-            )
+                new AuthToken($this->token),
+            ),
         ));
     }
 
@@ -172,7 +167,7 @@ final class Http implements Volumes
             new Organization\Id($volume['organization']),
             Volume\Size::of($volume['size']),
             Volume\Type::of($volume['volume_type']),
-            \is_array($volume['server']) ? new Server\Id($volume['server']['id']) : null
+            \is_array($volume['server']) ? new Server\Id($volume['server']['id']) : null,
         );
     }
 }

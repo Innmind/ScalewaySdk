@@ -32,7 +32,7 @@ final class Http implements Scaleway
     {
         return $this->tokens ??= new Tokens\Http(
             $this->transport,
-            $this->clock
+            $this->clock,
         );
     }
 
@@ -41,7 +41,7 @@ final class Http implements Scaleway
         return $this->authenticated ??= new Authenticated\Http(
             $this->transport,
             $this->clock,
-            $token
+            $token,
         );
     }
 }
