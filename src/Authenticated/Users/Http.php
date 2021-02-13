@@ -81,6 +81,7 @@ final class Http implements Users
 
     public function updateSshKeys(User\Id $id, User\SshKey ...$keys): void
     {
+        /** @psalm-suppress InvalidArgument */
         ($this->fulfill)(new Request(
             Url::of("https://account.scaleway.com/users/{$id->toString()}"),
             Method::patch(),

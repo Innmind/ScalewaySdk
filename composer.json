@@ -40,6 +40,6 @@
         "phpunit/phpunit": "~8.0",
         "giorgiosironi/eris": "^0.11.0",
         "innmind/object-graph": "~2.0",
-        "vimeo/psalm": "^3.8"
+        "vimeo/psalm": "~4.4"
     }
 }

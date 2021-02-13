@@ -49,6 +49,7 @@ final class Http implements Volumes
         Volume\Size $size,
         Volume\Type $type
     ): Volume {
+        /** @psalm-suppress InvalidArgument */
         $response = ($this->fulfill)(new Request(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes"),
             Method::post(),

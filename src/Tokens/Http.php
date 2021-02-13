@@ -44,6 +44,7 @@ final class Http implements Tokens
             $payload['2FA_token'] = $token->twoFaToken();
         }
 
+        /** @psalm-suppress InvalidArgument */
         $response = ($this->fulfill)(new Request(
             Url::of('https://account.scaleway.com/tokens'),
             Method::post(),
