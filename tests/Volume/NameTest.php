@@ -48,7 +48,7 @@ class NameTest extends TestCase
     {
         $this
             ->forAll(Set\Unicode::strings()->filter(static function($string): bool {
-                return !((bool) preg_match('~^[a-zA-Z0-9\-]+$~', $string));
+                return !((bool) \preg_match('~^[a-zA-Z0-9\-]+$~', $string));
             }))
             ->then(function($string): void {
                 $this->expectException(DomainException::class);

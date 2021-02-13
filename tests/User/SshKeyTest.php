@@ -10,7 +10,7 @@ use Innmind\BlackBox\{
     Set,
 };
 
-class Test extends TestCase
+class SshKeyTest extends TestCase
 {
     use BlackBox;
 

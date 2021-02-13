@@ -16,7 +16,6 @@ use Innmind\Http\{
     Header\Link,
     Header\LinkValue,
 };
-use Innmind\Url\Url;
 use Innmind\Stream\Readable\Stream;
 use Innmind\Json\Json;
 use PHPUnit\Framework\TestCase;
@@ -113,7 +112,7 @@ JSON
                                 'key' => 'baz',
                                 'description' => null,
                             ],
-                        ]
+                        ],
                     ]);
             }));
 
