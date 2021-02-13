@@ -19,14 +19,14 @@ use Innmind\Json\Json;
 use Innmind\Http\Message\Response;
 use Innmind\Stream\Readable\Stream;
 use PHPUnit\Framework\TestCase;
-use Eris\{
-    Generator,
-    TestTrait,
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set,
 };
 
 class HttpTest extends TestCase
 {
-    use TestTrait;
+    use BlackBox;
 
     public function testInterface()
     {
@@ -42,7 +42,7 @@ class HttpTest extends TestCase
     public function testCreatePermanentToken()
     {
         $this
-            ->forAll(Generator\string(), Generator\string(), Generator\string())
+            ->forAll($this->string(), $this->string(), $this->string())
             ->then(function($email, $password, $twofa): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
@@ -93,7 +93,7 @@ JSON
                 $this->assertFalse($token->expires());
             });
         $this
-            ->forAll(Generator\string(), Generator\string())
+            ->forAll($this->string(), $this->string())
             ->then(function($email, $password): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
@@ -147,7 +147,7 @@ JSON
     public function testCreateTemporaryToken()
     {
         $this
-            ->forAll(Generator\string(), Generator\string(), Generator\string())
+            ->forAll($this->string(), $this->string(), $this->string())
             ->then(function($email, $password, $twofa): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
@@ -199,7 +199,7 @@ JSON
                 $this->assertSame('2014-05-22T09:05:57+00:00', $token->expiresAt()->format(new ISO8601));
             });
         $this
-            ->forAll(Generator\string(), Generator\string())
+            ->forAll($this->string(), $this->string())
             ->then(function($email, $password): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
@@ -249,5 +249,18 @@ JSON
                 $this->assertTrue($token->expires());
                 $this->assertSame('2014-05-22T09:05:57+00:00', $token->expiresAt()->format(new ISO8601));
             });
+    }
+
+    private function string(): Set
+    {
+        return Set\Decorate::immutable(
+            static fn($chars) => \implode('', $chars),
+            Set\Sequence::of(
+                Set\Decorate::immutable(
+                    static fn($ord) => \chr($ord),
+                    Set\Integers::between(33, 126), // ascii
+                ),
+            ),
+        );
     }
 }

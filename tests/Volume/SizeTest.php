@@ -8,19 +8,19 @@ use Innmind\ScalewaySdk\{
     Exception\DomainException,
 };
 use PHPUnit\Framework\TestCase;
-use Eris\{
-    Generator,
-    TestTrait,
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set,
 };
 
 class SizeTest extends TestCase
 {
-    use TestTrait;
+    use BlackBox;
 
     public function testOf()
     {
         $this
-            ->forAll(Generator\pos())
+            ->forAll(Set\Integers::above(0))
             ->then(function($value): void {
                 $this->assertInstanceOf(Size::class, Size::of($value));
                 $this->assertSame($value, Size::of($value)->toInt());
@@ -30,7 +30,7 @@ class SizeTest extends TestCase
     public function testThrowWhenNegativeValue()
     {
         $this
-            ->forAll(Generator\neg())
+            ->forAll(Set\Integers::below(-1))
             ->then(function($value): void {
                 $this->expectException(DomainException::class);
 
