@@ -5,19 +5,19 @@ namespace Tests\Innmind\ScalewaySdk\Tokens;
 
 use Innmind\ScalewaySdk\Tokens\NewToken;
 use PHPUnit\Framework\TestCase;
-use Eris\{
-    Generator,
-    TestTrait,
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set,
 };
 
 class NewTokenTest extends TestCase
 {
-    use TestTrait;
+    use BlackBox;
 
     public function testPermanent()
     {
         $this
-            ->forAll(Generator\string(), Generator\string(), Generator\string())
+            ->forAll(Set\Strings::any(), Set\Strings::any(), Set\Strings::any())
             ->then(function($email, $password, $twofa): void {
                 $token = NewToken::permanent($email, $password, $twofa);
 
@@ -29,7 +29,7 @@ class NewTokenTest extends TestCase
                 $this->assertSame($twofa, $token->twoFaToken());
             });
         $this
-            ->forAll(Generator\string(), Generator\string())
+            ->forAll(Set\Strings::any(), Set\Strings::any())
             ->then(function($email, $password): void {
                 $token = NewToken::permanent($email, $password);
 
@@ -44,7 +44,7 @@ class NewTokenTest extends TestCase
     public function testTemporary()
     {
         $this
-            ->forAll(Generator\string(), Generator\string(), Generator\string())
+            ->forAll(Set\Strings::any(), Set\Strings::any(), Set\Strings::any())
             ->then(function($email, $password, $twofa): void {
                 $token = NewToken::temporary($email, $password, $twofa);
 
@@ -56,7 +56,7 @@ class NewTokenTest extends TestCase
                 $this->assertSame($twofa, $token->twoFaToken());
             });
         $this
-            ->forAll(Generator\string(), Generator\string())
+            ->forAll(Set\Strings::any(), Set\Strings::any())
             ->then(function($email, $password): void {
                 $token = NewToken::temporary($email, $password);
 

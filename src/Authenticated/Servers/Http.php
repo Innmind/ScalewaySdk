@@ -52,6 +52,7 @@ final class Http implements Servers
         IP\Id $ip,
         string ...$tags
     ): Server {
+        /** @psalm-suppress InvalidArgument */
         $response = ($this->fulfill)(new Request(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers"),
             Method::post(),
@@ -161,6 +162,7 @@ final class Http implements Servers
 
     public function execute(Server\Id $id, Server\Action $action): void
     {
+        /** @psalm-suppress InvalidArgument */
         ($this->fulfill)(new Request(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers/{$id->toString()}/action"),
             Method::post(),

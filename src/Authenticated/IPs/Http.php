@@ -50,6 +50,7 @@ final class Http implements IPs
 
     public function create(Organization\Id $organization): IP
     {
+        /** @psalm-suppress InvalidArgument */
         $response = ($this->fulfill)(new Request(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips"),
             Method::post(),
@@ -153,6 +154,7 @@ final class Http implements IPs
 
     public function attach(IP\Id $id, Server\Id $server): IP
     {
+        /** @psalm-suppress InvalidArgument */
         $response = ($this->fulfill)(new Request(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips/{$id->toString()}"),
             Method::patch(),

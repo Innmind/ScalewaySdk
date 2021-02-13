@@ -14,7 +14,7 @@ use Innmind\HttpTransport\Transport;
 use Innmind\TimeContinuum\Clock;
 use PHPUnit\Framework\TestCase;
 
-class ScalewayTest extends TestCase
+class HttpTest extends TestCase
 {
     public function testInterface()
     {

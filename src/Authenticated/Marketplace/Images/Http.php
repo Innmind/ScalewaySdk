@@ -44,7 +44,7 @@ final class Http implements Images
 
     public function list(): Set
     {
-        $url = Url::of("https://api-marketplace.scaleway.com/images");
+        $url = Url::of('https://api-marketplace.scaleway.com/images');
         /** @var list<array{id: string, name: string, logo: string, categories: list<string>, valid_until: string|null, organization: array{id: string}, current_public_version: string, versions: list<array{id: string, local_images: list<array{id: string, arch: string, zone: string, compatible_commercial_types: list<string>}>}>}> */
         $images = [];
 

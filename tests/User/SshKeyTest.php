@@ -5,19 +5,19 @@ namespace Tests\Innmind\ScalewaySdk\User;
 
 use Innmind\ScalewaySdk\User\SshKey;
 use PHPUnit\Framework\TestCase;
-use Eris\{
-    Generator,
-    TestTrait,
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set,
 };
 
-class Test extends TestCase
+class SshKeyTest extends TestCase
 {
-    use TestTrait;
+    use BlackBox;
 
     public function testInterface()
     {
         $this
-            ->forAll(Generator\string(), Generator\string())
+            ->forAll(Set\Strings::any(), Set\Strings::any())
             ->then(function($key, $description): void {
                 $sshKey = new SshKey($key, $description);
 
@@ -30,7 +30,7 @@ class Test extends TestCase
     public function testDescriptionIsNullable()
     {
         $this
-            ->forAll(Generator\string())
+            ->forAll(Set\Strings::any())
             ->then(function($key): void {
                 $sshKey = new SshKey($key);
 

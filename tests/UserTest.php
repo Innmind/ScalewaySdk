@@ -11,19 +11,19 @@ use Innmind\ScalewaySdk\{
 };
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
-use Eris\{
-    Generator,
-    TestTrait,
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set as DataSet,
 };
 
 class UserTest extends TestCase
 {
-    use TestTrait;
+    use BlackBox;
 
     public function testInterface()
     {
         $this
-            ->forAll(Generator\string(), Generator\string(), Generator\string(), Generator\string())
+            ->forAll(DataSet\Strings::any(), DataSet\Strings::any(), DataSet\Strings::any(), DataSet\Strings::any())
             ->then(function($email, $firstname, $lastname, $fullname): void {
                 $user = new User(
                     $id = new User\Id('5bea0358-db40-429e-bd82-914686a7e7b9'),

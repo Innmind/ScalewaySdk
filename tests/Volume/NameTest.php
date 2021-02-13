@@ -8,23 +8,34 @@ use Innmind\ScalewaySdk\{
     Exception\DomainException,
 };
 use PHPUnit\Framework\TestCase;
-use Eris\{
-    Generator,
-    TestTrait,
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set,
 };
 
 class NameTest extends TestCase
 {
-    use TestTrait;
+    use BlackBox;
 
     public function testInterface()
     {
         $this
-            ->minimumEvaluationRatio(0.01)
-            ->forAll(Generator\string(), Generator\pos())
-            ->when(static function($string): bool {
-                return (bool) preg_match('~^[a-zA-Z]+$~', $string);
-            })
+            ->forAll(
+                Set\Decorate::immutable(
+                    static fn($chars) => \implode('', $chars),
+                    Set\Sequence::of(
+                        Set\Decorate::immutable(
+                            static fn($ord) => \chr($ord),
+                            new Set\Either(
+                                Set\Integers::between(65, 90), // A-Z
+                                Set\Integers::between(97, 122), // a-z
+                            ),
+                        ),
+                        Set\Integers::between(1, 50),
+                    ),
+                ),
+                Set\Integers::above(0),
+            )
             ->then(function($string, $int): void {
                 $this->assertSame(
                     "$string-$int",
@@ -36,11 +47,9 @@ class NameTest extends TestCase
     public function testThrowWhenInvalidString()
     {
         $this
-            ->minimumEvaluationRatio(0.01)
-            ->forAll(Generator\string())
-            ->when(static function($string): bool {
-                return !((bool) preg_match('~^[a-zA-Z0-9\-]+$~', $string));
-            })
+            ->forAll(Set\Unicode::strings()->filter(static function($string): bool {
+                return !((bool) \preg_match('~^[a-zA-Z0-9\-]+$~', $string));
+            }))
             ->then(function($string): void {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);

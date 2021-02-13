@@ -1,6 +1,6 @@
 # Scaleway SDK (unofficial)
 
-[![Build Status](https://github.com/Innmind/ScalewaySdk/workflows/CI/badge.svg)](https://github.com/Innmind/ScalewaySdk/actions?query=workflow%3ACI)
+[![Build Status](https://github.com/Innmind/ScalewaySdk/workflows/CI/badge.svg?branch=master)](https://github.com/Innmind/ScalewaySdk/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/Innmind/ScalewaySdk/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/ScalewaySdk)
 [![Type Coverage](https://shepherd.dev/github/Innmind/ScalewaySdk/coverage.svg)](https://shepherd.dev/github/Innmind/ScalewaySdk)
 
