@@ -46,15 +46,25 @@ class HttpTest extends TestCase
             new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
         );
         $http
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('__invoke')
-            ->with($this->callback(static function($request): bool {
-                return $request->url()->toString() === 'https://account.scaleway.com/tokens' &&
-                    $request->method()->toString() === 'GET' &&
-                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
-            }))
-            ->willReturn($response = $this->createMock(Response::class));
-        $response
+            ->withConsecutive(
+                [$this->callback(static function($request): bool {
+                    return $request->url()->toString() === 'https://account.scaleway.com/tokens' &&
+                        $request->method()->toString() === 'GET' &&
+                        $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                })],
+                [$this->callback(static function($request): bool {
+                    return $request->url()->toString() === 'https://account.scaleway.com/tokens?page=2&per_page=50' &&
+                        $request->method()->toString() === 'GET' &&
+                        $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
+                })],
+            )
+            ->will($this->onConsecutiveCalls(
+                $response1 = $this->createMock(Response::class),
+                $response2 = $this->createMock(Response::class),
+            ));
+        $response1
             ->expects($this->any())
             ->method('headers')
             ->willReturn(Headers::of(
@@ -62,7 +72,7 @@ class HttpTest extends TestCase
                     new LinkValue(Url::of('/tokens?page=2&per_page=50'), 'next')
                 )
             ));
-        $response
+        $response1
             ->expects($this->once())
             ->method('body')
             ->willReturn(Stream::ofContent(<<<JSON
@@ -84,16 +94,7 @@ class HttpTest extends TestCase
 }
 JSON
             ));
-        $http
-            ->expects($this->at(1))
-            ->method('__invoke')
-            ->with($this->callback(static function($request): bool {
-                return $request->url()->toString() === 'https://account.scaleway.com/tokens?page=2&per_page=50' &&
-                    $request->method()->toString() === 'GET' &&
-                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
-            }))
-            ->willReturn($response = $this->createMock(Response::class));
-        $response
+        $response2
             ->expects($this->any())
             ->method('headers')
             ->willReturn(Headers::of(
@@ -101,7 +102,7 @@ JSON
                     new LinkValue(Url::of('/tokens?page=2&per_page=50'), 'last')
                 )
             ));
-        $response
+        $response2
             ->expects($this->once())
             ->method('body')
             ->willReturn(Stream::ofContent(<<<JSON
