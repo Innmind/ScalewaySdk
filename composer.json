@@ -17,7 +17,7 @@
     "require": {
         "php": "~7.4|~8.0",
         "innmind/time-continuum": "~2.0",
-        "ramsey/uuid": "^3.8",
+        "ramsey/uuid": "^3.8|^4.0",
         "innmind/http-transport": "~5.0",
         "innmind/json": "^1.1",
         "innmind/filesystem": "~4.0",
