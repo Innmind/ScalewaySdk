@@ -23,7 +23,7 @@
         "innmind/filesystem": "~4.0",
         "innmind/immutable": "~3.3",
         "innmind/ip": "~2.0",
-        "innmind/url": "~3.0"
+        "innmind/url": "^3.5.1"
     },
     "autoload": {
         "psr-4": {
