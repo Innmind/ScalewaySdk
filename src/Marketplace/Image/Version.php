@@ -14,7 +14,6 @@ final class Version
     public function __construct(Version\Id $id, Version\LocalImage ...$localImages)
     {
         $this->id = $id;
-        /** @var Set<Version\LocalImage> */
         $this->localImages = Set::of(Version\LocalImage::class, ...$localImages);
     }
 

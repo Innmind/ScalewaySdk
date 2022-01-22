@@ -27,7 +27,6 @@ final class LocalImage
         $this->id = $id;
         $this->architecture = $architecture;
         $this->region = $region;
-        /** @var Set<Name> */
         $this->compatibleCommercialTypes = Set::of(Name::class, ...$compatibleCommercialTypes);
     }
 
