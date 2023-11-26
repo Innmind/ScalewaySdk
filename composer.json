@@ -15,7 +15,7 @@
         "issues": "http://github.com/Innmind/ScalewaySdk/issues"
     },
     "require": {
-        "php": "~7.4|~8.0",
+        "php": "~8.2",
         "innmind/time-continuum": "~2.0",
         "ramsey/uuid": "^3.8|^4.0",
         "innmind/http-transport": "~5.0",
@@ -41,6 +41,6 @@
         "innmind/object-graph": "~2.0",
         "vimeo/psalm": "~4.4",
         "innmind/black-box": "^4.16",
-        "innmind/coding-standard": "^1.1"
+        "innmind/coding-standard": "~2.0"
     }
 }
