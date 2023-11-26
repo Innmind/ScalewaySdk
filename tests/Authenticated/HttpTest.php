@@ -19,7 +19,7 @@ class HttpTest extends TestCase
         $authenticated = new Authenticated\Http(
             $this->createMock(Transport::class),
             $this->createMock(Clock::class),
-            new Token\Id('989389f8-ea22-42e8-a194-1c5571051e2c')
+            new Token\Id('989389f8-ea22-42e8-a194-1c5571051e2c'),
         );
 
         $this->assertInstanceOf(Authenticated::class, $authenticated);

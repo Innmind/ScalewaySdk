@@ -34,8 +34,8 @@ class HttpTest extends TestCase
             Tokens::class,
             new Http(
                 $this->createMock(Transport::class),
-                new Clock(new UTC)
-            )
+                new Clock(new UTC),
+            ),
         );
     }
 
@@ -46,7 +46,7 @@ class HttpTest extends TestCase
             ->then(function($email, $password, $twofa): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
-                    new Clock(new UTC)
+                    new Clock(new UTC),
                 );
                 $http
                     ->expects($this->once())
@@ -97,7 +97,7 @@ JSON
             ->then(function($email, $password): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
-                    new Clock(new UTC)
+                    new Clock(new UTC),
                 );
                 $http
                     ->expects($this->once())
@@ -151,7 +151,7 @@ JSON
             ->then(function($email, $password, $twofa): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
-                    new Clock(new UTC)
+                    new Clock(new UTC),
                 );
                 $http
                     ->expects($this->once())
@@ -203,7 +203,7 @@ JSON
             ->then(function($email, $password): void {
                 $tokens = new Http(
                     $http = $this->createMock(Transport::class),
-                    new Clock(new UTC)
+                    new Clock(new UTC),
                 );
                 $http
                     ->expects($this->once())

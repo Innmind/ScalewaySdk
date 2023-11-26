@@ -21,8 +21,8 @@ class VersionTest extends TestCase
             $image = new Version\LocalImage(
                 new Image\Id('eb8f7471-5850-4e4f-886a-220efc09ce3d'),
                 Image\Architecture::arm(),
-                Region::paris1()
-            )
+                Region::paris1(),
+            ),
         );
 
         $this->assertSame($id, $version->id());

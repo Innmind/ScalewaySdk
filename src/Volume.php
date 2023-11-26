@@ -18,7 +18,7 @@ final class Volume
         Organization\Id $organization,
         Volume\Size $size,
         Volume\Type $type,
-        ?Server\Id $server
+        ?Server\Id $server,
     ) {
         $this->id = $id;
         $this->name = $name;

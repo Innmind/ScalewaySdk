@@ -31,8 +31,8 @@ class HttpTest extends TestCase
             new Http(
                 $this->createMock(Transport::class),
                 Region::paris1(),
-                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
-            )
+                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
+            ),
         );
     }
 
@@ -41,7 +41,7 @@ class HttpTest extends TestCase
         $images = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->exactly(2))
@@ -67,8 +67,8 @@ class HttpTest extends TestCase
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::of('/images?page=2&per_page=50'), 'next')
-                )
+                    new LinkValue(Url::of('/images?page=2&per_page=50'), 'next'),
+                ),
             ));
         $response1
             ->expects($this->once())
@@ -101,8 +101,8 @@ JSON
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::of('/images?page=2&per_page=50'), 'last')
-                )
+                    new LinkValue(Url::of('/images?page=2&per_page=50'), 'last'),
+                ),
             ));
         $response2
             ->expects($this->once())
@@ -143,7 +143,7 @@ JSON
         $images = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())

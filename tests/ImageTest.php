@@ -18,7 +18,7 @@ class ImageTest extends TestCase
             $organization = new Organization\Id('2f71895b-d649-47bd-a1a9-a145652e0f3e'),
             $name = new Image\Name('foo'),
             $architecture = Image\Architecture::x86_64(),
-            true
+            true,
         );
 
         $this->assertSame($id, $image->id());
@@ -35,7 +35,7 @@ class ImageTest extends TestCase
             $organization = new Organization\Id('2f71895b-d649-47bd-a1a9-a145652e0f3e'),
             $name = new Image\Name('foo'),
             $architecture = Image\Architecture::x86_64(),
-            false
+            false,
         );
 
         $this->assertSame($id, $image->id());

@@ -14,7 +14,7 @@ final class NewToken
         string $email,
         string $password,
         ?string $twoFaToken,
-        bool $expires
+        bool $expires,
     ) {
         $this->email = $email;
         $this->password = $password;
@@ -25,7 +25,7 @@ final class NewToken
     public static function permanent(
         string $email,
         string $password,
-        string $twoFaToken = null
+        string $twoFaToken = null,
     ): self {
         return new self($email, $password, $twoFaToken, false);
     }
@@ -33,7 +33,7 @@ final class NewToken
     public static function temporary(
         string $email,
         string $password,
-        string $twoFaToken = null
+        string $twoFaToken = null,
     ): self {
         return new self($email, $password, $twoFaToken, true);
     }

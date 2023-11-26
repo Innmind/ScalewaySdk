@@ -28,8 +28,8 @@ class HttpTest extends TestCase
             Users::class,
             new Http(
                 $this->createMock(Transport::class),
-                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
-            )
+                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
+            ),
         );
     }
 
@@ -37,7 +37,7 @@ class HttpTest extends TestCase
     {
         $users = new Http(
             $http = $this->createMock(Transport::class),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -93,7 +93,7 @@ JSON
     {
         $users = new Http(
             $http = $this->createMock(Transport::class),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -119,7 +119,7 @@ JSON
         $this->assertNull($users->updateSshKeys(
             new User\Id('25d37e4e-9674-450c-a8ac-96ec3be9a643'),
             new User\SshKey('foo', 'bar'),
-            new User\SshKey('baz')
+            new User\SshKey('baz'),
         ));
     }
 }

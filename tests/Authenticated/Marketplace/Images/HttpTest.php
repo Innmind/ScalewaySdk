@@ -34,8 +34,8 @@ class HttpTest extends TestCase
             new Http(
                 $this->createMock(Transport::class),
                 $this->createMock(Clock::class),
-                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
-            )
+                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
+            ),
         );
     }
 
@@ -44,7 +44,7 @@ class HttpTest extends TestCase
         $images = new Http(
             $http = $this->createMock(Transport::class),
             $this->createMock(Clock::class),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->exactly(2))
@@ -70,8 +70,8 @@ class HttpTest extends TestCase
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::of('/images?page=2&per_page=50'), 'next')
-                )
+                    new LinkValue(Url::of('/images?page=2&per_page=50'), 'next'),
+                ),
             ));
         $response1
             ->expects($this->once())
@@ -129,8 +129,8 @@ JSON
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::of('/images?page=2&per_page=50'), 'last')
-                )
+                    new LinkValue(Url::of('/images?page=2&per_page=50'), 'last'),
+                ),
             ));
         $response2
             ->expects($this->once())
@@ -230,7 +230,7 @@ JSON
         $images = new Http(
             $http = $this->createMock(Transport::class),
             $this->createMock(Clock::class),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -343,15 +343,15 @@ JSON
         $this->assertCount(21, first(first($image->versions())->localImages())->compatibleCommercialTypes());
         $this->assertSame(
             'f21defd0-9fd9-4fb2-a29a-22844a6be3cd',
-            first(first($image->versions())->localImages())->id()->toString()
+            first(first($image->versions())->localImages())->id()->toString(),
         );
         $this->assertSame(
             Architecture::x86_64(),
-            first(first($image->versions())->localImages())->architecture()
+            first(first($image->versions())->localImages())->architecture(),
         );
         $this->assertSame(
             Region::paris1(),
-            first(first($image->versions())->localImages())->region()
+            first(first($image->versions())->localImages())->region(),
         );
     }
 }

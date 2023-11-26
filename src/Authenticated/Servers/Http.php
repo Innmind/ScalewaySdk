@@ -38,7 +38,7 @@ final class Http implements Servers
     public function __construct(
         Transport $fulfill,
         Region $region,
-        Token\Id $token
+        Token\Id $token,
     ) {
         $this->fulfill = $fulfill;
         $this->region = $region;
@@ -50,7 +50,7 @@ final class Http implements Servers
         Organization\Id $organization,
         Image\Id $image,
         IP\Id $ip,
-        string ...$tags
+        string ...$tags,
     ): Server {
         /** @psalm-suppress InvalidArgument */
         $response = ($this->fulfill)(new Request(

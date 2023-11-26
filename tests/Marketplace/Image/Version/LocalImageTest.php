@@ -22,7 +22,7 @@ class LocalImageTest extends TestCase
             $architecture = Image\Architecture::arm(),
             $region = Region::paris1(),
             $foo = new Name('foo'),
-            $bar = new Name('bar')
+            $bar = new Name('bar'),
         );
 
         $this->assertSame($id, $image->id());

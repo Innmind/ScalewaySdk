@@ -33,7 +33,7 @@ final class Http implements Images
     public function __construct(
         Transport $fulfill,
         Region $region,
-        Token\Id $token
+        Token\Id $token,
     ) {
         $this->fulfill = $fulfill;
         $this->region = $region;

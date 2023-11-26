@@ -26,7 +26,7 @@ final class ChooseImage
     public function __invoke(
         Region $region,
         Marketplace\Image\Name $image,
-        Marketplace\Product\Server\Name $server
+        Marketplace\Product\Server\Name $server,
     ): Image\Id {
         $ids = $this
             ->images

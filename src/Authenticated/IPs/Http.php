@@ -41,7 +41,7 @@ final class Http implements IPs
     public function __construct(
         Transport $fulfill,
         Region $region,
-        Token\Id $token
+        Token\Id $token,
     ) {
         $this->fulfill = $fulfill;
         $this->region = $region;
@@ -165,7 +165,7 @@ final class Http implements IPs
             ),
             Stream::ofContent(Json::encode([
                 'server' => $server->toString(),
-            ]))
+            ])),
         ));
 
         /** @var array{ip: array{address: string, id: string, organization: string, server: ?array{id: string}}} */
@@ -190,7 +190,7 @@ final class Http implements IPs
             new IP\Id($ip['id']),
             $address,
             new Organization\Id($ip['organization']),
-            \is_array($ip['server']) ? new Server\Id($ip['server']['id']) : null
+            \is_array($ip['server']) ? new Server\Id($ip['server']['id']) : null,
         );
     }
 }

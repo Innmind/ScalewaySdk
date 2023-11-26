@@ -35,8 +35,8 @@ class HttpTest extends TestCase
             new Http(
                 $this->createMock(Transport::class),
                 Region::paris1(),
-                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
-            )
+                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
+            ),
         );
     }
 
@@ -45,7 +45,7 @@ class HttpTest extends TestCase
         $ips = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -88,7 +88,7 @@ JSON
         $ips = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->exactly(2))
@@ -114,8 +114,8 @@ JSON
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::of('/ips?page=2&per_page=50'), 'next')
-                )
+                    new LinkValue(Url::of('/ips?page=2&per_page=50'), 'next'),
+                ),
             ));
         $response1
             ->expects($this->once())
@@ -173,7 +173,7 @@ JSON
         $ips = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -213,7 +213,7 @@ JSON
         $ips = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -232,7 +232,7 @@ JSON
         $ips = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -266,7 +266,7 @@ JSON
 
         $ip = $ips->attach(
             new IP\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd'),
-            new Server\Id('49083202-b911-4a4a-b367-6f36c7f1ac4f')
+            new Server\Id('49083202-b911-4a4a-b367-6f36c7f1ac4f'),
         );
 
         $this->assertInstanceOf(IP::class, $ip);

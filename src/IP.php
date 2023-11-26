@@ -16,7 +16,7 @@ final class IP
         IP\Id $id,
         Address $address,
         Organization\Id $organization,
-        ?Server\Id $server
+        ?Server\Id $server,
     ) {
         $this->id = $id;
         $this->address = $address;

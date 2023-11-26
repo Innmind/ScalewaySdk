@@ -30,7 +30,7 @@ final class Http implements Users
 
     public function __construct(
         Transport $fulfill,
-        Token\Id $token
+        Token\Id $token,
     ) {
         $this->fulfill = $fulfill;
         $this->token = $token;

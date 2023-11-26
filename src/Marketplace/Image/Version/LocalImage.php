@@ -22,7 +22,7 @@ final class LocalImage
         Image\Id $id,
         Image\Architecture $architecture,
         Region $region,
-        Name ...$compatibleCommercialTypes
+        Name ...$compatibleCommercialTypes,
     ) {
         $this->id = $id;
         $this->architecture = $architecture;

@@ -34,7 +34,7 @@ final class User
         string $lastname,
         string $fullname,
         Set $sshKeys,
-        Set $organizations
+        Set $organizations,
     ) {
         assertSet(SshKey::class, $sshKeys, 6);
         assertSet(Organization\Id::class, $organizations, 7);

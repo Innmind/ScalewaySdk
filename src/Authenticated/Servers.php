@@ -18,7 +18,7 @@ interface Servers
         Organization\Id $organization,
         Image\Id $image,
         IP\Id $ip,
-        string ...$tags
+        string ...$tags,
     ): Server;
 
     /**

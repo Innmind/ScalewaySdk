@@ -23,13 +23,13 @@ class BootstrapTest extends TestCase
     {
         $sdk = bootstrap(
             $http = $this->createMock(Transport::class),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertInstanceOf(Scaleway\Http::class, $sdk);
         $stack = Stack::of(
             ThrowOnErrorTransport::class,
-            \get_class($http)
+            \get_class($http),
         );
 
         $this->assertTrue($stack((new Graph)($sdk)));

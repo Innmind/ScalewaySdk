@@ -20,7 +20,7 @@ class VolumeTest extends TestCase
             $organization = new Organization\Id('228f4993-ca23-4c1c-b2eb-aa8a94e093dd'),
             $size = Volume\Size::of(42),
             $type = Volume\Type::lssd(),
-            $server = new Server\Id('228f4993-ca23-4c1c-b2eb-aa8a94e093dd')
+            $server = new Server\Id('228f4993-ca23-4c1c-b2eb-aa8a94e093dd'),
         );
 
         $this->assertSame($id, $volume->id());
@@ -40,7 +40,7 @@ class VolumeTest extends TestCase
             $organization = new Organization\Id('228f4993-ca23-4c1c-b2eb-aa8a94e093dd'),
             $size = Volume\Size::of(42),
             $type = Volume\Type::lssd(),
-            null
+            null,
         );
 
         $this->assertSame($id, $volume->id());

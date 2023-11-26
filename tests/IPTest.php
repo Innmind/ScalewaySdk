@@ -19,7 +19,7 @@ class IPTest extends TestCase
             $id = new IP\Id('8f7ad8e0-c9e3-4705-afb4-bf4ce11e6f90'),
             $address = $this->createMock(Address::class),
             $organization = new Organization\Id('2ac913be-006c-4b76-b60e-86ec822bcdda'),
-            $server = new Server\Id('37462fcb-8744-4567-98a4-a239edf5758d')
+            $server = new Server\Id('37462fcb-8744-4567-98a4-a239edf5758d'),
         );
 
         $this->assertSame($id, $ip->id());

@@ -32,7 +32,7 @@ final class Http implements Tokens
     public function __construct(
         Transport $fulfill,
         Clock $clock,
-        Token\Id $token
+        Token\Id $token,
     ) {
         $this->fulfill = $fulfill;
         $this->clock = $clock;

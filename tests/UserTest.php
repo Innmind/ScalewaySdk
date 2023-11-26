@@ -32,7 +32,7 @@ class UserTest extends TestCase
                     $lastname,
                     $fullname,
                     $keys = Set::of(SshKey::class),
-                    $organizations = Set::of(Organization\Id::class)
+                    $organizations = Set::of(Organization\Id::class),
                 );
 
                 $this->assertSame($id, $user->id());

@@ -35,7 +35,7 @@ final class Server
         Server\State $state,
         Set $allowedActions,
         Set $tags,
-        Set $volumes
+        Set $volumes,
     ) {
         assertSet(Server\Action::class, $allowedActions, 5);
         assertSet('string', $tags, 6);

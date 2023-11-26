@@ -20,7 +20,7 @@ final class Http implements Marketplace
     public function __construct(
         Transport $transport,
         Clock $clock,
-        Token\Id $token
+        Token\Id $token,
     ) {
         $this->transport = $transport;
         $this->clock = $clock;

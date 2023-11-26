@@ -22,7 +22,7 @@ final class Http implements Scaleway
 
     public function __construct(
         Transport $transport,
-        Clock $clock
+        Clock $clock,
     ) {
         $this->transport = http()['throw_on_error']($transport);
         $this->clock = $clock;

@@ -36,7 +36,7 @@ final class Http implements Volumes
     public function __construct(
         Transport $fulfill,
         Region $region,
-        Token\Id $token
+        Token\Id $token,
     ) {
         $this->fulfill = $fulfill;
         $this->region = $region;
@@ -47,7 +47,7 @@ final class Http implements Volumes
         Volume\Name $name,
         Organization\Id $organization,
         Volume\Size $size,
-        Volume\Type $type
+        Volume\Type $type,
     ): Volume {
         /** @psalm-suppress InvalidArgument */
         $response = ($this->fulfill)(new Request(

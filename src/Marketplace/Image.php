@@ -34,7 +34,7 @@ final class Image
         Image\Name $name,
         Set $categories,
         Url $logo,
-        ?PointInTime $expiresAt
+        ?PointInTime $expiresAt,
     ) {
         assertSet(Image\Version::class, $versions, 4);
         assertSet(Image\Category::class, $categories, 6);

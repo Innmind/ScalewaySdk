@@ -20,14 +20,14 @@ class HttpTest extends TestCase
     {
         $scaleway = new Http(
             $this->createMock(Transport::class),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertInstanceOf(Scaleway::class, $scaleway);
         $this->assertInstanceOf(Tokens\Http::class, $scaleway->tokens());
         $this->assertInstanceOf(
             Authenticated\Http::class,
-            $scaleway->authenticated(new Token\Id('4c11230f-c14a-4874-8cbd-d9c969b86631'))
+            $scaleway->authenticated(new Token\Id('4c11230f-c14a-4874-8cbd-d9c969b86631')),
         );
     }
 }

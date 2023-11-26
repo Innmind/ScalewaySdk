@@ -15,7 +15,7 @@ interface Volumes
         Volume\Name $name,
         Organization\Id $organization,
         Volume\Size $size,
-        Volume\Type $type
+        Volume\Type $type,
     ): Volume;
 
     /**

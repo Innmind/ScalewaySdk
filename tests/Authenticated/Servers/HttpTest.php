@@ -39,8 +39,8 @@ class HttpTest extends TestCase
             new Http(
                 $this->createMock(Transport::class),
                 Region::paris1(),
-                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
-            )
+                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
+            ),
         );
     }
 
@@ -49,7 +49,7 @@ class HttpTest extends TestCase
         $servers = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -123,7 +123,7 @@ JSON
             new Image\Id('9956c6a6-607c-4d42-92bc-5f51f7087ae4'),
             new IP\Id('95be217a-c32f-41c1-b62d-97827adfc9e5'),
             'foo',
-            'bar'
+            'bar',
         );
 
         $this->assertInstanceOf(Server::class, $server);
@@ -142,7 +142,7 @@ JSON
         $servers = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->exactly(2))
@@ -168,8 +168,8 @@ JSON
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::of('/servers?page=2&per_page=50'), 'next')
-                )
+                    new LinkValue(Url::of('/servers?page=2&per_page=50'), 'next'),
+                ),
             ));
         $response1
             ->expects($this->once())
@@ -286,7 +286,7 @@ JSON
         $servers = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -361,7 +361,7 @@ JSON
         $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', first($server->volumes())->toString());
         $this->assertSame(
             [Server\Action::backup()],
-            unwrap($server->allowedActions())
+            unwrap($server->allowedActions()),
         );
     }
 
@@ -370,7 +370,7 @@ JSON
         $servers = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -389,7 +389,7 @@ JSON
         $servers = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -403,7 +403,7 @@ JSON
 
         $this->assertNull($servers->execute(
             new Server\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd'),
-            Server\Action::powerOff()
+            Server\Action::powerOff(),
         ));
     }
 }

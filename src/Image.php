@@ -16,7 +16,7 @@ final class Image
         Organization\Id $organization,
         Image\Name $name,
         Image\Architecture $architecture,
-        bool $public
+        bool $public,
     ) {
         $this->id = $id;
         $this->organization = $organization;

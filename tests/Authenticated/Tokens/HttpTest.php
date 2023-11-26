@@ -33,8 +33,8 @@ class HttpTest extends TestCase
             new Http(
                 $this->createMock(Transport::class),
                 new Clock,
-                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
-            )
+                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
+            ),
         );
     }
 
@@ -43,7 +43,7 @@ class HttpTest extends TestCase
         $tokens = new Http(
             $http = $this->createMock(Transport::class),
             new Clock(new UTC),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->exactly(2))
@@ -69,8 +69,8 @@ class HttpTest extends TestCase
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::of('/tokens?page=2&per_page=50'), 'next')
-                )
+                    new LinkValue(Url::of('/tokens?page=2&per_page=50'), 'next'),
+                ),
             ));
         $response1
             ->expects($this->once())
@@ -99,8 +99,8 @@ JSON
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::of('/tokens?page=2&per_page=50'), 'last')
-                )
+                    new LinkValue(Url::of('/tokens?page=2&per_page=50'), 'last'),
+                ),
             ));
         $response2
             ->expects($this->once())
@@ -137,7 +137,7 @@ JSON
         $tokens = new Http(
             $http = $this->createMock(Transport::class),
             new Clock(new UTC),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -180,7 +180,7 @@ JSON
         $tokens = new Http(
             $http = $this->createMock(Transport::class),
             new Clock(new UTC),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())

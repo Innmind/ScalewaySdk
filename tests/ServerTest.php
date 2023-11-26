@@ -26,7 +26,7 @@ class ServerTest extends TestCase
             $state = Server\State::running(),
             $allowedActions = Set::of(Server\Action::class),
             $tags = Set::of('string'),
-            $volumes = Set::of(Volume\Id::class)
+            $volumes = Set::of(Volume\Id::class),
         );
 
         $this->assertSame($id, $server->id());

@@ -20,7 +20,7 @@ class HttpTest extends TestCase
         $marketplace = new Http(
             $this->createMock(Transport::class),
             $this->createMock(Clock::class),
-            new Token\Id('c378c728-8fe9-4e23-a07f-a2f49dff5c46')
+            new Token\Id('c378c728-8fe9-4e23-a07f-a2f49dff5c46'),
         );
 
         $this->assertInstanceOf(Marketplace::class, $marketplace);

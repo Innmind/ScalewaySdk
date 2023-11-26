@@ -34,8 +34,8 @@ class HttpTest extends TestCase
             new Http(
                 $this->createMock(Transport::class),
                 Region::paris1(),
-                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
-            )
+                new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
+            ),
         );
     }
 
@@ -44,7 +44,7 @@ class HttpTest extends TestCase
         $volumes = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -83,7 +83,7 @@ JSON
             new Volume\Name('foobar'),
             new Organization\Id('000a115d-2852-4b0a-9ce8-47f1134ba95a'),
             Volume\Size::of(10000000000),
-            Volume\Type::lssd()
+            Volume\Type::lssd(),
         );
 
         $this->assertInstanceOf(Volume::class, $volume);
@@ -99,7 +99,7 @@ JSON
         $volumes = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->exactly(2))
@@ -125,8 +125,8 @@ JSON
             ->method('headers')
             ->willReturn(Headers::of(
                 new Link(
-                    new LinkValue(Url::of('/volumes?page=2&per_page=50'), 'next')
-                )
+                    new LinkValue(Url::of('/volumes?page=2&per_page=50'), 'next'),
+                ),
             ));
         $response1
             ->expects($this->once())
@@ -190,7 +190,7 @@ JSON
         $volumes = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())
@@ -234,7 +234,7 @@ JSON
         $volumes = new Http(
             $http = $this->createMock(Transport::class),
             Region::paris1(),
-            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20')
+            new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
             ->expects($this->once())

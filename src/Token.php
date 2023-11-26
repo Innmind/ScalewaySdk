@@ -17,7 +17,7 @@ final class Token
         Id $id,
         User\Id $user,
         PointInTime $createdAt,
-        PointInTime $expiresAt = null
+        PointInTime $expiresAt = null,
     ) {
         $this->id = $id;
         $this->user = $user;
