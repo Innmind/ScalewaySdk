@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Innmind\ScalewaySdk;
 
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\assertSet;
 
 final class Server
 {
@@ -37,10 +36,6 @@ final class Server
         Set $tags,
         Set $volumes,
     ) {
-        assertSet(Server\Action::class, $allowedActions, 5);
-        assertSet('string', $tags, 6);
-        assertSet(Volume\Id::class, $volumes, 7);
-
         $this->id = $id;
         $this->organization = $organization;
         $this->name = $name;

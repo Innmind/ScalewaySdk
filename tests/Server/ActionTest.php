@@ -31,7 +31,7 @@ class ActionTest extends TestCase
         Action::of('foo');
     }
 
-    public function actions(): array
+    public static function actions(): array
     {
         return [
             ['powerOn', 'poweron'],

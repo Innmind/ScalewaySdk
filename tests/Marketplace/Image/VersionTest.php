@@ -8,8 +8,6 @@ use Innmind\ScalewaySdk\{
     Image,
     Region,
 };
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
 class VersionTest extends TestCase
@@ -26,8 +24,6 @@ class VersionTest extends TestCase
         );
 
         $this->assertSame($id, $version->id());
-        $this->assertInstanceOf(Set::class, $version->localImages());
-        $this->assertSame(Version\LocalImage::class, (string) $version->localImages()->type());
-        $this->assertSame([$image], unwrap($version->localImages()));
+        $this->assertSame([$image], $version->localImages()->toList());
     }
 }

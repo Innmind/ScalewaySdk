@@ -14,23 +14,25 @@ use Innmind\ScalewaySdk\{
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
-    Message\Request\Request,
-    Message\Method,
+    Request,
+    Method,
     ProtocolVersion,
     Headers,
     Header\ContentType,
+    Header\Link,
     Header\LinkValue,
 };
+use Innmind\Filesystem\File\Content;
 use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Stream\Readable\Stream;
 use Innmind\IP\{
     IPv4,
     IPv6,
-    Exception\AddressNotMatchingIPv4Format,
 };
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\first;
+use Innmind\Immutable\{
+    Set,
+    Predicate\Instance,
+};
 
 final class Http implements IPs
 {
@@ -51,18 +53,21 @@ final class Http implements IPs
     public function create(Organization\Id $organization): IP
     {
         /** @psalm-suppress InvalidArgument */
-        $response = ($this->fulfill)(new Request(
+        $response = ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips"),
-            Method::post(),
-            new ProtocolVersion(2, 0),
+            Method::post,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
                 ContentType::of('application', 'json'),
             ),
-            Stream::ofContent(Json::encode([
+            Content::ofString(Json::encode([
                 'organization' => $organization->toString(),
             ])),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{ip: array{address: string, id: string, organization: string, server: ?array{id: string}}} */
         $body = Json::decode($response->body()->toString());
@@ -77,62 +82,59 @@ final class Http implements IPs
         $ips = [];
 
         do {
-            $response = ($this->fulfill)(new Request(
+            $response = ($this->fulfill)(Request::of(
                 $url,
-                Method::get(),
-                new ProtocolVersion(2, 0),
+                Method::get,
+                ProtocolVersion::v20,
                 Headers::of(
-                    new AuthToken($this->token),
+                    AuthToken::of($this->token),
                 ),
-            ));
+            ))->match(
+                static fn($success) => $success->response(),
+                static fn() => throw new \RuntimeException,
+            );
 
             /** @var array{ips: list<array{address: string, id: string, organization: string, server: ?array{id: string}}>} */
             $body = Json::decode($response->body()->toString());
             $ips = \array_merge($ips, $body['ips']);
-            $next = null;
 
-            if ($response->headers()->contains('Link')) {
-                /**
-                 * @psalm-suppress ArgumentTypeCoercion
-                 * @var Set<LinkValue>
-                 */
-                $next = $response
-                    ->headers()
-                    ->get('Link')
-                    ->values()
-                    ->filter(static function(LinkValue $link): bool {
-                        return $link->relationship() === 'next';
-                    });
-
-                if ($next->size() === 1) {
-                    $next = $url
-                        ->withPath(first($next)->url()->path())
-                        ->withQuery(first($next)->url()->query());
-                    $url = $next;
-                }
-            }
-        } while ($next instanceof Url);
+            $url = $response
+                ->headers()
+                ->find(Link::class)
+                ->flatMap(
+                    static fn($header) => $header
+                        ->values()
+                        ->keep(Instance::of(LinkValue::class))
+                        ->find(static fn($link) => $link->relationship() === 'next'),
+                )
+                ->map(
+                    static fn($link) => $url
+                        ->withPath($link->url()->path())
+                        ->withQuery($link->url()->query()),
+                )
+                ->match(
+                    static fn($next) => $next,
+                    static fn() => null,
+                );
+        } while ($url instanceof Url);
 
         /** @var Set<IP> */
-        $set = Set::of(IP::class);
-
-        foreach ($ips as $ip) {
-            $set = ($set)($this->decode($ip));
-        }
-
-        return $set;
+        return Set::of(...$ips)->map($this->decode(...));
     }
 
     public function get(IP\Id $id): IP
     {
-        $response = ($this->fulfill)(new Request(
+        $response = ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips/{$id->toString()}"),
-            Method::get(),
-            new ProtocolVersion(2, 0),
+            Method::get,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
             ),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{ip: array{address: string, id: string, organization: string, server: ?array{id: string}}} */
         $body = Json::decode($response->body()->toString());
@@ -142,31 +144,37 @@ final class Http implements IPs
 
     public function remove(IP\Id $id): void
     {
-        ($this->fulfill)(new Request(
+        ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips/{$id->toString()}"),
-            Method::delete(),
-            new ProtocolVersion(2, 0),
+            Method::delete,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
             ),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
     }
 
     public function attach(IP\Id $id, Server\Id $server): IP
     {
         /** @psalm-suppress InvalidArgument */
-        $response = ($this->fulfill)(new Request(
+        $response = ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/ips/{$id->toString()}"),
-            Method::patch(),
-            new ProtocolVersion(2, 0),
+            Method::patch,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
                 ContentType::of('application', 'json'),
             ),
-            Stream::ofContent(Json::encode([
+            Content::ofString(Json::encode([
                 'server' => $server->toString(),
             ])),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{ip: array{address: string, id: string, organization: string, server: ?array{id: string}}} */
         $body = Json::decode($response->body()->toString());
@@ -180,11 +188,12 @@ final class Http implements IPs
      */
     private function decode(array $ip): IP
     {
-        try {
-            $address = IPv4::of($ip['address']);
-        } catch (AddressNotMatchingIPv4Format $e) {
-            $address = IPv6::of($ip['address']);
-        }
+        $address = IPv4::maybe($ip['address'])
+            ->otherwise(static fn() => IPv6::maybe($ip['address']))
+            ->match(
+                static fn($ip) => $ip,
+                static fn() => throw new \RuntimeException,
+            );
 
         return new IP(
             new IP\Id($ip['id']),

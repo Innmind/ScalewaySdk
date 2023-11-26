@@ -10,16 +10,17 @@ use Innmind\ScalewaySdk\{
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
-    Message\Request\Request,
-    Message\Method,
+    Request,
+    Method,
     ProtocolVersion,
     Headers,
     Header\ContentType,
 };
+use Innmind\Filesystem\File\Content;
 use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Stream\Readable\Stream;
 use Innmind\TimeContinuum\Clock;
+use Innmind\Immutable\Maybe;
 
 final class Http implements Tokens
 {
@@ -45,15 +46,18 @@ final class Http implements Tokens
         }
 
         /** @psalm-suppress InvalidArgument */
-        $response = ($this->fulfill)(new Request(
+        $response = ($this->fulfill)(Request::of(
             Url::of('https://account.scaleway.com/tokens'),
-            Method::post(),
-            new ProtocolVersion(2, 0),
+            Method::post,
+            ProtocolVersion::v20,
             Headers::of(
                 ContentType::of('application', 'json'),
             ),
-            Stream::ofContent(Json::encode($payload)),
-        ));
+            Content::ofString(Json::encode($payload)),
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{token: array{id: string, user_id: string, creation_date: string, expires: string|null}} */
         $body = Json::decode($response->body()->toString());
@@ -62,8 +66,16 @@ final class Http implements Tokens
         return new Token(
             new Token\Id($data['id']),
             new User\Id($data['user_id']),
-            $this->clock->at($data['creation_date']),
-            \is_string($data['expires']) ? $this->clock->at($data['expires']) : null,
+            $this->clock->at($data['creation_date'])->match(
+                static fn($point) => $point,
+                static fn() => throw new \LogicException,
+            ),
+            Maybe::of($data['expires'])
+                ->flatMap($this->clock->at(...))
+                ->match(
+                    static fn($point) => $point,
+                    static fn() => null,
+                ),
         );
     }
 }

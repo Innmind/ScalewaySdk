@@ -9,15 +9,26 @@ use Innmind\ScalewaySdk\{
     Tokens\NewToken,
     Token,
 };
-use Innmind\HttpTransport\Transport;
+use Innmind\HttpTransport\{
+    Transport,
+    Success,
+};
+use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\Earth\{
     Clock,
     Timezone\UTC,
     Format\ISO8601,
 };
 use Innmind\Json\Json;
-use Innmind\Http\Message\Response;
-use Innmind\Stream\Readable\Stream;
+use Innmind\Http\{
+    Request,
+    Method,
+    Response,
+    Response\StatusCode,
+    ProtocolVersion,
+};
+use Innmind\Url\Url;
+use Innmind\Immutable\Either;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -54,7 +65,10 @@ class HttpTest extends TestCase
                     ->with($this->callback(static function($request) use ($email, $password, $twofa): bool {
                         return $request->url()->toString() === 'https://account.scaleway.com/tokens' &&
                             $request->method()->toString() === 'POST' &&
-                            $request->headers()->get('content-type')->toString() === 'Content-Type: application/json' &&
+                            'Content-Type: application/json' === $request->headers()->get('content-type')->match(
+                                static fn($header) => $header->toString(),
+                                static fn() => null,
+                            ) &&
                             $request->body()->toString() === Json::encode([
                                 'email' => $email,
                                 'password' => $password,
@@ -62,27 +76,34 @@ class HttpTest extends TestCase
                                 '2FA_token' => $twofa,
                             ]);
                     }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn(Stream::ofContent(<<<JSON
-{
-  "token": {
-    "creation_date": "2014-05-22T08:05:57.556385+00:00",
-    "expires": null,
-    "id": "9de8f869-c58e-4aa3-9208-2d4eaff5fa20",
-    "inherits_user_perms": true,
-    "permissions": [],
-    "roles": {
-      "organization": null,
-      "role": null
-    },
-    "user_id": "5bea0358-db40-429e-bd82-914686a7e7b9"
-  }
-}
-JSON
-                    ));
+                    ->willReturn(Either::right(new Success(
+                        Request::of(
+                            Url::of('https://account.scaleway.com/tokens'),
+                            Method::post,
+                            ProtocolVersion::v20,
+                        ),
+                        Response::of(
+                            StatusCode::ok,
+                            ProtocolVersion::v20,
+                            null,
+                            Content::ofString(<<<JSON
+                            {
+                              "token": {
+                                "creation_date": "2014-05-22T08:05:57.556385+00:00",
+                                "expires": null,
+                                "id": "9de8f869-c58e-4aa3-9208-2d4eaff5fa20",
+                                "inherits_user_perms": true,
+                                "permissions": [],
+                                "roles": {
+                                  "organization": null,
+                                  "role": null
+                                },
+                                "user_id": "5bea0358-db40-429e-bd82-914686a7e7b9"
+                              }
+                            }
+                            JSON),
+                        ),
+                    )));
 
                 $token = $tokens->create(NewToken::permanent($email, $password, $twofa));
 
@@ -105,34 +126,44 @@ JSON
                     ->with($this->callback(static function($request) use ($email, $password): bool {
                         return $request->url()->toString() === 'https://account.scaleway.com/tokens' &&
                             $request->method()->toString() === 'POST' &&
-                            $request->headers()->get('content-type')->toString() === 'Content-Type: application/json' &&
+                            'Content-Type: application/json' === $request->headers()->get('content-type')->match(
+                                static fn($header) => $header->toString(),
+                                static fn() => null,
+                            ) &&
                             $request->body()->toString() === Json::encode([
                                 'email' => $email,
                                 'password' => $password,
                                 'expires' => false,
                             ]);
                     }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn(Stream::ofContent(<<<JSON
-{
-  "token": {
-    "creation_date": "2014-05-22T08:05:57.556385+00:00",
-    "expires": null,
-    "id": "9de8f869-c58e-4aa3-9208-2d4eaff5fa20",
-    "inherits_user_perms": true,
-    "permissions": [],
-    "roles": {
-      "organization": null,
-      "role": null
-    },
-    "user_id": "5bea0358-db40-429e-bd82-914686a7e7b9"
-  }
-}
-JSON
-                    ));
+                    ->willReturn(Either::right(new Success(
+                        Request::of(
+                            Url::of('https://account.scaleway.com/tokens'),
+                            Method::post,
+                            ProtocolVersion::v20,
+                        ),
+                        Response::of(
+                            StatusCode::ok,
+                            ProtocolVersion::v20,
+                            null,
+                            Content::ofString(<<<JSON
+                            {
+                              "token": {
+                                "creation_date": "2014-05-22T08:05:57.556385+00:00",
+                                "expires": null,
+                                "id": "9de8f869-c58e-4aa3-9208-2d4eaff5fa20",
+                                "inherits_user_perms": true,
+                                "permissions": [],
+                                "roles": {
+                                  "organization": null,
+                                  "role": null
+                                },
+                                "user_id": "5bea0358-db40-429e-bd82-914686a7e7b9"
+                              }
+                            }
+                            JSON),
+                        ),
+                    )));
 
                 $token = $tokens->create(NewToken::permanent($email, $password));
 
@@ -159,7 +190,10 @@ JSON
                     ->with($this->callback(static function($request) use ($email, $password, $twofa): bool {
                         return $request->url()->toString() === 'https://account.scaleway.com/tokens' &&
                             $request->method()->toString() === 'POST' &&
-                            $request->headers()->get('content-type')->toString() === 'Content-Type: application/json' &&
+                            'Content-Type: application/json' === $request->headers()->get('content-type')->match(
+                                static fn($header) => $header->toString(),
+                                static fn() => null,
+                            ) &&
                             $request->body()->toString() === Json::encode([
                                 'email' => $email,
                                 'password' => $password,
@@ -167,27 +201,34 @@ JSON
                                 '2FA_token' => $twofa,
                             ]);
                     }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn(Stream::ofContent(<<<JSON
-{
-  "token": {
-    "creation_date": "2014-05-22T08:05:57.556385+00:00",
-    "expires": "2014-05-22T09:05:57.556385+00:00",
-    "id": "9de8f869-c58e-4aa3-9208-2d4eaff5fa20",
-    "inherits_user_perms": true,
-    "permissions": [],
-    "roles": {
-      "organization": null,
-      "role": null
-    },
-    "user_id": "5bea0358-db40-429e-bd82-914686a7e7b9"
-  }
-}
-JSON
-                    ));
+                    ->willReturn(Either::right(new Success(
+                        Request::of(
+                            Url::of('https://account.scaleway.com/tokens'),
+                            Method::post,
+                            ProtocolVersion::v20,
+                        ),
+                        Response::of(
+                            StatusCode::ok,
+                            ProtocolVersion::v20,
+                            null,
+                            Content::ofString(<<<JSON
+                            {
+                              "token": {
+                                "creation_date": "2014-05-22T08:05:57.556385+00:00",
+                                "expires": "2014-05-22T09:05:57.556385+00:00",
+                                "id": "9de8f869-c58e-4aa3-9208-2d4eaff5fa20",
+                                "inherits_user_perms": true,
+                                "permissions": [],
+                                "roles": {
+                                  "organization": null,
+                                  "role": null
+                                },
+                                "user_id": "5bea0358-db40-429e-bd82-914686a7e7b9"
+                              }
+                            }
+                            JSON),
+                        ),
+                    )));
 
                 $token = $tokens->create(NewToken::temporary($email, $password, $twofa));
 
@@ -211,34 +252,44 @@ JSON
                     ->with($this->callback(static function($request) use ($email, $password): bool {
                         return $request->url()->toString() === 'https://account.scaleway.com/tokens' &&
                             $request->method()->toString() === 'POST' &&
-                            $request->headers()->get('content-type')->toString() === 'Content-Type: application/json' &&
+                            'Content-Type: application/json' === $request->headers()->get('content-type')->match(
+                                static fn($header) => $header->toString(),
+                                static fn() => null,
+                            ) &&
                             $request->body()->toString() === Json::encode([
                                 'email' => $email,
                                 'password' => $password,
                                 'expires' => true,
                             ]);
                     }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn(Stream::ofContent(<<<JSON
-{
-  "token": {
-    "creation_date": "2014-05-22T08:05:57.556385+00:00",
-    "expires": "2014-05-22T09:05:57.556385+00:00",
-    "id": "9de8f869-c58e-4aa3-9208-2d4eaff5fa20",
-    "inherits_user_perms": true,
-    "permissions": [],
-    "roles": {
-      "organization": null,
-      "role": null
-    },
-    "user_id": "5bea0358-db40-429e-bd82-914686a7e7b9"
-  }
-}
-JSON
-                    ));
+                    ->willReturn(Either::right(new Success(
+                        Request::of(
+                            Url::of('https://account.scaleway.com/tokens'),
+                            Method::post,
+                            ProtocolVersion::v20,
+                        ),
+                        Response::of(
+                            StatusCode::ok,
+                            ProtocolVersion::v20,
+                            null,
+                            Content::ofString(<<<JSON
+                            {
+                              "token": {
+                                "creation_date": "2014-05-22T08:05:57.556385+00:00",
+                                "expires": "2014-05-22T09:05:57.556385+00:00",
+                                "id": "9de8f869-c58e-4aa3-9208-2d4eaff5fa20",
+                                "inherits_user_perms": true,
+                                "permissions": [],
+                                "roles": {
+                                  "organization": null,
+                                  "role": null
+                                },
+                                "user_id": "5bea0358-db40-429e-bd82-914686a7e7b9"
+                              }
+                            }
+                            JSON),
+                        ),
+                    )));
 
                 $token = $tokens->create(NewToken::temporary($email, $password));
 
@@ -253,14 +304,6 @@ JSON
 
     private function string(): Set
     {
-        return Set\Decorate::immutable(
-            static fn($chars) => \implode('', $chars),
-            Set\Sequence::of(
-                Set\Decorate::immutable(
-                    static fn($ord) => \chr($ord),
-                    Set\Integers::between(33, 126), // ascii
-                ),
-            ),
-        );
+        return Set\Strings::madeOf(Set\Integers::between(33, 126)->map(\chr(...))); // ascii
     }
 }

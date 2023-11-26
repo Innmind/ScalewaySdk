@@ -18,6 +18,9 @@ final class LocalImage
     /** @var Set<Name> */
     private Set $compatibleCommercialTypes;
 
+    /**
+     * @no-named-arguments
+     */
     public function __construct(
         Image\Id $id,
         Image\Architecture $architecture,
@@ -27,7 +30,7 @@ final class LocalImage
         $this->id = $id;
         $this->architecture = $architecture;
         $this->region = $region;
-        $this->compatibleCommercialTypes = Set::of(Name::class, ...$compatibleCommercialTypes);
+        $this->compatibleCommercialTypes = Set::of(...$compatibleCommercialTypes);
     }
 
     public function id(): Image\Id

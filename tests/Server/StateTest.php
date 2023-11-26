@@ -31,7 +31,7 @@ class StateTest extends TestCase
         State::of('foo');
     }
 
-    public function cases(): array
+    public static function cases(): array
     {
         return [
             ['running', 'running'],

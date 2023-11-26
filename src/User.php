@@ -9,7 +9,6 @@ use Innmind\ScalewaySdk\{
     Organization,
 };
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\assertSet;
 
 final class User
 {
@@ -36,9 +35,6 @@ final class User
         Set $sshKeys,
         Set $organizations,
     ) {
-        assertSet(SshKey::class, $sshKeys, 6);
-        assertSet(Organization\Id::class, $organizations, 7);
-
         $this->id = $id;
         $this->email = $email;
         $this->firstname = $firstname;

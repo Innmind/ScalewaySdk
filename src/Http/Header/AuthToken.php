@@ -9,10 +9,10 @@ use Innmind\Http\{
     Header\Value\Value,
 };
 
-final class AuthToken extends Header
+final class AuthToken
 {
-    public function __construct(Id $id)
+    public static function of(Id $id): Header
     {
-        parent::__construct('X-Auth-Token', new Value($id->toString()));
+        return new Header('X-Auth-Token', new Value($id->toString()));
     }
 }

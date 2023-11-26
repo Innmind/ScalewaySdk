@@ -15,16 +15,20 @@ use Innmind\ScalewaySdk\{
 use Innmind\TimeContinuum\Clock;
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
-    Message\Request\Request,
-    Message\Method,
+    Request,
+    Method,
     ProtocolVersion,
     Headers,
+    Header\Link,
     Header\LinkValue,
 };
 use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\first;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+    Predicate\Instance,
+};
 
 final class Http implements Images
 {
@@ -49,62 +53,59 @@ final class Http implements Images
         $images = [];
 
         do {
-            $response = ($this->fulfill)(new Request(
+            $response = ($this->fulfill)(Request::of(
                 $url,
-                Method::get(),
-                new ProtocolVersion(2, 0),
+                Method::get,
+                ProtocolVersion::v20,
                 Headers::of(
-                    new AuthToken($this->token),
+                    AuthToken::of($this->token),
                 ),
-            ));
+            ))->match(
+                static fn($success) => $success->response(),
+                static fn() => throw new \RuntimeException,
+            );
 
             /** @var array{images: list<array{id: string, name: string, logo: string, categories: list<string>, valid_until: string|null, organization: array{id: string}, current_public_version: string, versions: list<array{id: string, local_images: list<array{id: string, arch: string, zone: string, compatible_commercial_types: list<string>}>}>}>} */
             $body = Json::decode($response->body()->toString());
             $images = \array_merge($images, $body['images']);
-            $next = null;
 
-            if ($response->headers()->contains('Link')) {
-                /**
-                 * @psalm-suppress ArgumentTypeCoercion
-                 * @var Set<LinkValue>
-                 */
-                $next = $response
-                    ->headers()
-                    ->get('Link')
-                    ->values()
-                    ->filter(static function(LinkValue $link): bool {
-                        return $link->relationship() === 'next';
-                    });
-
-                if ($next->size() === 1) {
-                    $next = $url
-                        ->withPath(first($next)->url()->path())
-                        ->withQuery(first($next)->url()->query());
-                    $url = $next;
-                }
-            }
-        } while ($next instanceof Url);
+            $url = $response
+                ->headers()
+                ->find(Link::class)
+                ->flatMap(
+                    static fn($header) => $header
+                        ->values()
+                        ->keep(Instance::of(LinkValue::class))
+                        ->find(static fn($link) => $link->relationship() === 'next'),
+                )
+                ->map(
+                    static fn($link) => $url
+                        ->withPath($link->url()->path())
+                        ->withQuery($link->url()->query()),
+                )
+                ->match(
+                    static fn($next) => $next,
+                    static fn() => null,
+                );
+        } while ($url instanceof Url);
 
         /** @var Set<Marketplace\Image> */
-        $set = Set::of(Marketplace\Image::class);
-
-        foreach ($images as $image) {
-            $set = ($set)($this->decode($image));
-        }
-
-        return $set;
+        return Set::of(...$images)->map($this->decode(...));
     }
 
     public function get(Marketplace\Image\Id $id): Marketplace\Image
     {
-        $response = ($this->fulfill)(new Request(
+        $response = ($this->fulfill)(Request::of(
             Url::of("https://api-marketplace.scaleway.com/images/{$id->toString()}"),
-            Method::get(),
-            new ProtocolVersion(2, 0),
+            Method::get,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
             ),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{image: array{id: string, name: string, logo: string, categories: list<string>, valid_until: string|null, organization: array{id: string}, current_public_version: string, versions: list<array{id: string, local_images: list<array{id: string, arch: string, zone: string, compatible_commercial_types: list<string>}>}>}} */
         $body = Json::decode($response->body()->toString());
@@ -136,11 +137,16 @@ final class Http implements Images
                     }, $version['local_images']),
                 ));
             },
-            Set::of(Marketplace\Image\Version::class),
+            Set::of(),
         );
-        $currentPublicVersion = first($versions->filter(
-            static fn($version): bool => $version->id()->toString() === $image['current_public_version'],
-        ));
+        $currentPublicVersion = $versions
+            ->filter(
+                static fn($version): bool => $version->id()->toString() === $image['current_public_version'],
+            )
+            ->match(
+                static fn($version) => $version,
+                static fn() => throw new \RuntimeException,
+            );
 
         /** @var Set<Marketplace\Image\Category> */
         $categories = \array_reduce(
@@ -148,7 +154,7 @@ final class Http implements Images
             static function(Set $categories, string $category): Set {
                 return $categories->add(Marketplace\Image\Category::of($category));
             },
-            Set::of(Marketplace\Image\Category::class),
+            Set::of(),
         );
 
         return new Marketplace\Image(
@@ -159,7 +165,12 @@ final class Http implements Images
             new Marketplace\Image\Name($image['name']),
             $categories,
             Url::of($image['logo']),
-            \is_string($image['valid_until']) ? $this->clock->at($image['valid_until']) : null,
+            Maybe::of($image['valid_until'])
+                ->flatMap($this->clock->at(...))
+                ->match(
+                    static fn($point) => $point,
+                    static fn() => null,
+                ),
         );
     }
 }

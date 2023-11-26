@@ -21,19 +21,10 @@ class NameTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Decorate::immutable(
-                    static fn($chars) => \implode('', $chars),
-                    Set\Sequence::of(
-                        Set\Decorate::immutable(
-                            static fn($ord) => \chr($ord),
-                            new Set\Either(
-                                Set\Integers::between(65, 90), // A-Z
-                                Set\Integers::between(97, 122), // a-z
-                            ),
-                        ),
-                        Set\Integers::between(1, 50),
-                    ),
-                ),
+                Set\Strings::madeOf(
+                    Set\Integers::between(65, 90)->map(\chr(...)), // A-Z
+                    Set\Integers::between(97, 122)->map(\chr(...)), // a-z
+                )->between(1, 50),
                 Set\Integers::above(0),
             )
             ->then(function($string, $int): void {

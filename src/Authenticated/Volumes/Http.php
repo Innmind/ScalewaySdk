@@ -14,18 +14,21 @@ use Innmind\ScalewaySdk\{
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
-    Message\Request\Request,
-    Message\Method,
+    Request,
+    Method,
     ProtocolVersion,
     Headers,
     Header\ContentType,
+    Header\Link,
     Header\LinkValue,
 };
+use Innmind\Filesystem\File\Content;
 use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Stream\Readable\Stream;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\first;
+use Innmind\Immutable\{
+    Set,
+    Predicate\Instance,
+};
 
 final class Http implements Volumes
 {
@@ -50,21 +53,24 @@ final class Http implements Volumes
         Volume\Type $type,
     ): Volume {
         /** @psalm-suppress InvalidArgument */
-        $response = ($this->fulfill)(new Request(
+        $response = ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes"),
-            Method::post(),
-            new ProtocolVersion(2, 0),
+            Method::post,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
                 ContentType::of('application', 'json'),
             ),
-            Stream::ofContent(Json::encode([
+            Content::ofString(Json::encode([
                 'name' => $name->toString(),
                 'organization' => $organization->toString(),
                 'size' => $size->toInt(),
                 'type' => $type->toString(),
             ])),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{volume: array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}} */
         $body = Json::decode($response->body()->toString());
@@ -79,14 +85,17 @@ final class Http implements Volumes
         $volumes = [];
 
         do {
-            $response = ($this->fulfill)(new Request(
+            $response = ($this->fulfill)(Request::of(
                 $url,
-                Method::get(),
-                new ProtocolVersion(2, 0),
+                Method::get,
+                ProtocolVersion::v20,
                 Headers::of(
-                    new AuthToken($this->token),
+                    AuthToken::of($this->token),
                 ),
-            ));
+            ))->match(
+                static fn($success) => $success->response(),
+                static fn() => throw new \RuntimeException,
+            );
 
             /** @var array{volumes: list<array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}>} */
             $body = Json::decode($response->body()->toString());
@@ -94,50 +103,41 @@ final class Http implements Volumes
                 $volumes,
                 $body['volumes'],
             );
-            $next = null;
 
-            if ($response->headers()->contains('Link')) {
-                /**
-                 * @psalm-suppress ArgumentTypeCoercion
-                 * @var Set<LinkValue>
-                 */
-                $next = $response
-                    ->headers()
-                    ->get('Link')
-                    ->values()
-                    ->filter(static function(LinkValue $link): bool {
-                        return $link->relationship() === 'next';
-                    });
-
-                if ($next->size() === 1) {
-                    $next = $url
-                        ->withPath(first($next)->url()->path())
-                        ->withQuery(first($next)->url()->query());
-                    $url = $next;
-                }
-            }
-        } while ($next instanceof Url);
+            $url = $response
+                ->headers()
+                ->find(Link::class)
+                ->flatMap(
+                    static fn($header) => $header
+                        ->values()
+                        ->keep(Instance::of(LinkValue::class))
+                        ->find(static fn($link) => $link->relationship() === 'next'),
+                )
+                ->match(
+                    static fn($link) => $url
+                        ->withPath($link->url()->path())
+                        ->withQuery($link->url()->query()),
+                    static fn() => null,
+                );
+        } while ($url instanceof Url);
 
         /** @var Set<Volume> */
-        $set = Set::of(Volume::class);
-
-        foreach ($volumes as $volume) {
-            $set = ($set)($this->decode($volume));
-        }
-
-        return $set;
+        return Set::of(...$volumes)->map($this->decode(...));
     }
 
     public function get(Volume\Id $id): Volume
     {
-        $response = ($this->fulfill)(new Request(
+        $response = ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes/{$id->toString()}"),
-            Method::get(),
-            new ProtocolVersion(2, 0),
+            Method::get,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
             ),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{volume: array{id: string, name: string, organization: string, size: int, volume_type: string, server: ?array{id: string}}} */
         $body = Json::decode($response->body()->toString());
@@ -147,12 +147,12 @@ final class Http implements Volumes
 
     public function remove(Volume\Id $id): void
     {
-        ($this->fulfill)(new Request(
+        ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/volumes/{$id->toString()}"),
-            Method::delete(),
-            new ProtocolVersion(2, 0),
+            Method::delete,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
             ),
         ));
     }

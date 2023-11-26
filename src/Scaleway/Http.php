@@ -11,7 +11,6 @@ use Innmind\ScalewaySdk\{
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\TimeContinuum\Clock;
-use function Innmind\HttpTransport\bootstrap as http;
 
 final class Http implements Scaleway
 {
@@ -24,7 +23,7 @@ final class Http implements Scaleway
         Transport $transport,
         Clock $clock,
     ) {
-        $this->transport = http()['throw_on_error']($transport);
+        $this->transport = $transport;
         $this->clock = $clock;
     }
 

@@ -31,7 +31,7 @@ class ArchitectureTest extends TestCase
         Architecture::of('foo');
     }
 
-    public function cases(): array
+    public static function cases(): array
     {
         return [
             ['arm', 'arm'],

@@ -47,7 +47,7 @@ class SizeTest extends TestCase
         $this->assertSame($value, Size::$name()->toInt());
     }
 
-    public function constructors(): array
+    public static function constructors(): array
     {
         return [
             ['of25Go', 25000000000],

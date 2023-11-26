@@ -7,7 +7,6 @@ use Innmind\ScalewaySdk\Organization;
 use Innmind\TimeContinuum\PointInTime;
 use Innmind\Url\Url;
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\assertSet;
 
 final class Image
 {
@@ -36,9 +35,6 @@ final class Image
         Url $logo,
         ?PointInTime $expiresAt,
     ) {
-        assertSet(Image\Version::class, $versions, 4);
-        assertSet(Image\Category::class, $categories, 6);
-
         $this->id = $id;
         $this->organization = $organization;
         $this->currentPublicVersion = $currentPublicVersion;

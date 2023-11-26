@@ -9,15 +9,20 @@ use Innmind\ScalewaySdk\{
     Token,
     User,
 };
-use Innmind\HttpTransport\Transport;
+use Innmind\HttpTransport\{
+    Transport,
+    Success,
+};
 use Innmind\Http\{
-    Message\Response,
+    Response,
+    Response\StatusCode,
     Headers,
     Header\Link,
     Header\LinkValue,
 };
-use Innmind\Stream\Readable\Stream;
+use Innmind\Filesystem\File\Content;
 use Innmind\Json\Json;
+use Innmind\Immutable\Either;
 use PHPUnit\Framework\TestCase;
 
 class HttpTest extends TestCase
@@ -42,40 +47,53 @@ class HttpTest extends TestCase
         $http
             ->expects($this->once())
             ->method('__invoke')
-            ->with($this->callback(static function($request): bool {
-                return $request->url()->toString() === 'https://account.scaleway.com/users/25d37e4e-9674-450c-a8ac-96ec3be9a643' &&
-                    $request->method()->toString() === 'GET' &&
-                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
-            }))
-            ->willReturn($response = $this->createMock(Response::class));
-        $response
-            ->expects($this->once())
-            ->method('body')
-            ->willReturn(Stream::ofContent(<<<JSON
-{
-    "user": {
-        "email": "jsnow@got.com",
-        "firstname": "John",
-        "fullname": "John Snow",
-        "id": "25d37e4e-9674-450c-a8ac-96ec3be9a643",
-        "lastname": "Snow",
-        "organizations": [
-            {
-                "id": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
-                "name": "watev"
-            }
-        ],
-        "roles": null,
-        "ssh_public_keys": [
-            {
-                "key": "foo",
-                "description": "bar"
-            }
-        ]
-    }
-}
-JSON
-            ));
+            ->willReturnCallback(function($request) {
+                $this->assertSame(
+                    'https://account.scaleway.com/users/25d37e4e-9674-450c-a8ac-96ec3be9a643',
+                    $request->url()->toString(),
+                );
+                $this->assertSame(
+                    'GET',
+                    $request->method()->toString(),
+                );
+                $this->assertSame(
+                    'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20',
+                    $request->headers()->get('x-auth-token')->match(
+                        static fn($header) => $header->toString(),
+                        static fn() => null,
+                    ),
+                );
+
+                return Either::right(new Success($request, Response::of(
+                    StatusCode::ok,
+                    $request->protocolVersion(),
+                    null,
+                    Content::ofString(<<<JSON
+                    {
+                        "user": {
+                            "email": "jsnow@got.com",
+                            "firstname": "John",
+                            "fullname": "John Snow",
+                            "id": "25d37e4e-9674-450c-a8ac-96ec3be9a643",
+                            "lastname": "Snow",
+                            "organizations": [
+                                {
+                                    "id": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+                                    "name": "watev"
+                                }
+                            ],
+                            "roles": null,
+                            "ssh_public_keys": [
+                                {
+                                    "key": "foo",
+                                    "description": "bar"
+                                }
+                            ]
+                        }
+                    }
+                    JSON),
+                )));
+            });
 
         $user = $users->get(new User\Id('25d37e4e-9674-450c-a8ac-96ec3be9a643'));
 
@@ -98,11 +116,24 @@ JSON
         $http
             ->expects($this->once())
             ->method('__invoke')
-            ->with($this->callback(static function($request): bool {
-                return $request->url()->toString() === 'https://account.scaleway.com/users/25d37e4e-9674-450c-a8ac-96ec3be9a643' &&
-                    $request->method()->toString() === 'PATCH' &&
-                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
-                    $request->body()->toString() === Json::encode([
+            ->willReturnCallback(function($request) {
+                $this->assertSame(
+                    'https://account.scaleway.com/users/25d37e4e-9674-450c-a8ac-96ec3be9a643',
+                    $request->url()->toString(),
+                );
+                $this->assertSame(
+                    'PATCH',
+                    $request->method()->toString(),
+                );
+                $this->assertSame(
+                    'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20',
+                    $request->headers()->get('x-auth-token')->match(
+                        static fn($header) => $header->toString(),
+                        static fn() => null,
+                    ),
+                );
+                $this->assertSame(
+                    Json::encode([
                         'ssh_public_keys' => [
                             [
                                 'key' => 'foo',
@@ -113,8 +144,15 @@ JSON
                                 'description' => null,
                             ],
                         ],
-                    ]);
-            }));
+                    ]),
+                    $request->body()->toString(),
+                );
+
+                return Either::right(new Success($request, Response::of(
+                    StatusCode::ok,
+                    $request->protocolVersion(),
+                )));
+            });
 
         $this->assertNull($users->updateSshKeys(
             new User\Id('25d37e4e-9674-450c-a8ac-96ec3be9a643'),

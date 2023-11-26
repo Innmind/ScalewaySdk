@@ -16,18 +16,21 @@ use Innmind\ScalewaySdk\{
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
-    Message\Request\Request,
-    Message\Method,
+    Request,
+    Method,
     ProtocolVersion,
     Headers,
     Header\ContentType,
+    Header\Link,
     Header\LinkValue,
 };
+use Innmind\Filesystem\File\Content;
 use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Stream\Readable\Stream;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\first;
+use Innmind\Immutable\{
+    Set,
+    Predicate\Instance,
+};
 
 final class Http implements Servers
 {
@@ -52,16 +55,15 @@ final class Http implements Servers
         IP\Id $ip,
         string ...$tags,
     ): Server {
-        /** @psalm-suppress InvalidArgument */
-        $response = ($this->fulfill)(new Request(
+        $response = ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers"),
-            Method::post(),
-            new ProtocolVersion(2, 0),
+            Method::post,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
                 ContentType::of('application', 'json'),
             ),
-            Stream::ofContent(Json::encode([
+            Content::ofString(Json::encode([
                 'name' => $name->toString(),
                 'organization' => $organization->toString(),
                 'image' => $image->toString(),
@@ -70,7 +72,10 @@ final class Http implements Servers
                 'enable_ipv6' => true,
                 'public_ip' => $ip->toString(),
             ])),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{server: array{id: string, organization: string, name: string, image: array{id: string}, public_ip: array{id: string}, state: string, allowed_actions?: list<string>, tags: list<string>, volumes: list<array{id: string}>}} */
         $body = Json::decode($response->body()->toString());
@@ -85,62 +90,59 @@ final class Http implements Servers
         $servers = [];
 
         do {
-            $response = ($this->fulfill)(new Request(
+            $response = ($this->fulfill)(Request::of(
                 $url,
-                Method::get(),
-                new ProtocolVersion(2, 0),
+                Method::get,
+                ProtocolVersion::v20,
                 Headers::of(
-                    new AuthToken($this->token),
+                    AuthToken::of($this->token),
                 ),
-            ));
+            ))->match(
+                static fn($success) => $success->response(),
+                static fn() => throw new \RuntimeException,
+            );
 
             /** @var array{servers: list<array{id: string, organization: string, name: string, image: array{id: string}, public_ip: array{id: string}, state: string, allowed_actions?: list<string>, tags: list<string>, volumes: list<array{id: string}>}>} */
             $body = Json::decode($response->body()->toString());
             $servers = \array_merge($servers, $body['servers']);
-            $next = null;
 
-            if ($response->headers()->contains('Link')) {
-                /**
-                 * @psalm-suppress ArgumentTypeCoercion
-                 * @var Set<LinkValue>
-                 */
-                $next = $response
-                    ->headers()
-                    ->get('Link')
-                    ->values()
-                    ->filter(static function(LinkValue $link): bool {
-                        return $link->relationship() === 'next';
-                    });
-
-                if ($next->size() === 1) {
-                    $next = $url
-                        ->withPath(first($next)->url()->path())
-                        ->withQuery(first($next)->url()->query());
-                    $url = $next;
-                }
-            }
-        } while ($next instanceof Url);
+            $url = $response
+                ->headers()
+                ->find(Link::class)
+                ->flatMap(
+                    static fn($header) => $header
+                        ->values()
+                        ->keep(Instance::of(LinkValue::class))
+                        ->find(static fn($link) => $link->relationship() === 'next'),
+                )
+                ->map(
+                    static fn($link) => $url
+                        ->withPath($link->url()->path())
+                        ->withQuery($link->url()->query()),
+                )
+                ->match(
+                    static fn($next) => $next,
+                    static fn() => null,
+                );
+        } while ($url instanceof Url);
 
         /** @var Set<Server> */
-        $set = Set::of(Server::class);
-
-        foreach ($servers as $server) {
-            $set = ($set)($this->decode($server));
-        }
-
-        return $set;
+        return Set::of(...$servers)->map($this->decode(...));
     }
 
     public function get(Server\Id $id): Server
     {
-        $response = ($this->fulfill)(new Request(
+        $response = ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers/{$id->toString()}"),
-            Method::get(),
-            new ProtocolVersion(2, 0),
+            Method::get,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
             ),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{server: array{id: string, organization: string, name: string, image: array{id: string}, public_ip: array{id: string}, state: string, allowed_actions?: list<string>, tags: list<string>, volumes: list<array{id: string}>}} */
         $body = Json::decode($response->body()->toString());
@@ -150,31 +152,36 @@ final class Http implements Servers
 
     public function remove(Server\Id $id): void
     {
-        ($this->fulfill)(new Request(
+        ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers/{$id->toString()}"),
-            Method::delete(),
-            new ProtocolVersion(2, 0),
+            Method::delete,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
             ),
-        ));
+        ))->match(
+            static fn() => null,
+            static fn() => throw new \RuntimeException,
+        );
     }
 
     public function execute(Server\Id $id, Server\Action $action): void
     {
-        /** @psalm-suppress InvalidArgument */
-        ($this->fulfill)(new Request(
+        ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/servers/{$id->toString()}/action"),
-            Method::post(),
-            new ProtocolVersion(2, 0),
+            Method::post,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
                 ContentType::of('application', 'json'),
             ),
-            Stream::ofContent(Json::encode([
+            Content::ofString(Json::encode([
                 'action' => $action->toString(),
             ])),
-        ));
+        ))->match(
+            static fn() => null,
+            static fn() => throw new \RuntimeException,
+        );
     }
 
     /**
@@ -188,7 +195,7 @@ final class Http implements Servers
             static function(Set $allowed, string $action): Set {
                 return ($allowed)(Server\Action::of($action));
             },
-            Set::of(Server\Action::class),
+            Set::of(),
         );
         /** @var Set<Volume\Id> */
         $volumes = \array_reduce(
@@ -197,7 +204,7 @@ final class Http implements Servers
                 /** @var array{id: string} $volume */
                 return ($volumes)(new Volume\Id($volume['id']));
             },
-            Set::of(Volume\Id::class),
+            Set::of(),
         );
 
         return new Server(

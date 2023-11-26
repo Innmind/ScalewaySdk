@@ -11,10 +11,13 @@ final class Version
     /** @var Set<Version\LocalImage> */
     private Set $localImages;
 
+    /**
+     * @no-named-arguments
+     */
     public function __construct(Version\Id $id, Version\LocalImage ...$localImages)
     {
         $this->id = $id;
-        $this->localImages = Set::of(Version\LocalImage::class, ...$localImages);
+        $this->localImages = Set::of(...$localImages);
     }
 
     public function id(): Version\Id

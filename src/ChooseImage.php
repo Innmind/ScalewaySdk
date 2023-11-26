@@ -8,19 +8,18 @@ use Innmind\ScalewaySdk\{
     Exception\ImageCannotBeDetermined,
 };
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\{
-    first,
-    unwrap,
-};
 
 final class ChooseImage
 {
     /** @var Set<Marketplace\Image> */
     private Set $images;
 
+    /**
+     * @no-named-arguments
+     */
     public function __construct(Marketplace\Image ...$images)
     {
-        $this->images = Set::of(Marketplace\Image::class, ...$images);
+        $this->images = Set::of(...$images);
     }
 
     public function __invoke(
@@ -28,16 +27,15 @@ final class ChooseImage
         Marketplace\Image\Name $image,
         Marketplace\Product\Server\Name $server,
     ): Image\Id {
-        $ids = $this
+        return $this
             ->images
             ->filter(static function(Marketplace\Image $marketplace) use ($image): bool {
                 return $marketplace->name()->toString() === $image->toString();
             })
-            ->toSetOf(
-                LocalImage::class,
-                static function(Marketplace\Image $image): \Generator {
-                    yield from unwrap($image->currentPublicVersion()->localImages());
-                },
+            ->flatMap(
+                static fn($image) => $image
+                    ->currentPublicVersion()
+                    ->localImages(),
             )
             ->filter(static function(LocalImage $localImage) use ($region, $server): bool {
                 return $localImage->region() === $region &&
@@ -47,12 +45,10 @@ final class ChooseImage
                             return $type->toString() === $server->toString();
                         })
                         ->empty();
-            });
-
-        if ($ids->size() !== 1) {
-            throw new ImageCannotBeDetermined;
-        }
-
-        return first($ids)->id();
+            })
+            ->match(
+                static fn($image) => $image->id(),
+                static fn() => throw new ImageCannotBeDetermined,
+            );
     }
 }

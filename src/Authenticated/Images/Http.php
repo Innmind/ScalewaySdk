@@ -13,16 +13,19 @@ use Innmind\ScalewaySdk\{
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
-    Message\Request\Request,
-    Message\Method,
+    Request,
+    Method,
     ProtocolVersion,
     Headers,
+    Header\Link,
     Header\LinkValue,
 };
 use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\first;
+use Innmind\Immutable\{
+    Set,
+    Predicate\Instance,
+};
 
 final class Http implements Images
 {
@@ -47,62 +50,59 @@ final class Http implements Images
         $images = [];
 
         do {
-            $response = ($this->fulfill)(new Request(
+            $response = ($this->fulfill)(Request::of(
                 $url,
-                Method::get(),
-                new ProtocolVersion(2, 0),
+                Method::get,
+                ProtocolVersion::v20,
                 Headers::of(
-                    new AuthToken($this->token),
+                    AuthToken::of($this->token),
                 ),
-            ));
+            ))->match(
+                static fn($success) => $success->response(),
+                static fn() => throw new \RuntimeException,
+            );
 
             /** @var array{images: list<array{id: string, organization: string, name: string, arch: string, public: bool}>} */
             $body = Json::decode($response->body()->toString());
             $images = \array_merge($images, $body['images']);
-            $next = null;
 
-            if ($response->headers()->contains('Link')) {
-                /**
-                 * @psalm-suppress ArgumentTypeCoercion
-                 * @var Set<LinkValue>
-                 */
-                $next = $response
-                    ->headers()
-                    ->get('Link')
-                    ->values()
-                    ->filter(static function(LinkValue $link): bool {
-                        return $link->relationship() === 'next';
-                    });
-
-                if ($next->size() === 1) {
-                    $next = $url
-                        ->withPath(first($next)->url()->path())
-                        ->withQuery(first($next)->url()->query());
-                    $url = $next;
-                }
-            }
-        } while ($next instanceof Url);
+            $url = $response
+                ->headers()
+                ->find(Link::class)
+                ->flatMap(
+                    static fn($header) => $header
+                        ->values()
+                        ->keep(Instance::of(LinkValue::class))
+                        ->find(static fn($link) => $link->relationship() === 'next'),
+                )
+                ->map(
+                    static fn($link) => $url
+                        ->withPath($link->url()->path())
+                        ->withQuery($link->url()->query()),
+                )
+                ->match(
+                    static fn($next) => $next,
+                    static fn() => null,
+                );
+        } while ($url instanceof Url);
 
         /** @var Set<Image> */
-        $set = Set::of(Image::class);
-
-        foreach ($images as $image) {
-            $set = ($set)($this->decode($image));
-        }
-
-        return $set;
+        return Set::of(...$images)->map($this->decode(...));
     }
 
     public function get(Image\Id $id): Image
     {
-        $response = ($this->fulfill)(new Request(
+        $response = ($this->fulfill)(Request::of(
             Url::of("https://cp-{$this->region->toString()}.scaleway.com/images/{$id->toString()}"),
-            Method::get(),
-            new ProtocolVersion(2, 0),
+            Method::get,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
             ),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{image: array{id: string, organization: string, name: string, arch: string, public: bool}} */
         $body = Json::decode($response->body()->toString());

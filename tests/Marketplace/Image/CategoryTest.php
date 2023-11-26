@@ -31,7 +31,7 @@ class CategoryTest extends TestCase
         Category::of('foo');
     }
 
-    public function cases(): array
+    public static function cases(): array
     {
         return [
             ['instantApp', 'instantapp'],

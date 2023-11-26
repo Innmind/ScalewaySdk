@@ -12,16 +12,20 @@ use Innmind\ScalewaySdk\{
 use Innmind\TimeContinuum\Clock;
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
-    Message\Request\Request,
-    Message\Method,
+    Request,
+    Method,
     ProtocolVersion,
     Headers,
+    Header\Link,
     Header\LinkValue,
 };
 use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\first;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+    Predicate\Instance,
+};
 
 final class Http implements Tokens
 {
@@ -46,62 +50,59 @@ final class Http implements Tokens
         $tokens = [];
 
         do {
-            $response = ($this->fulfill)(new Request(
+            $response = ($this->fulfill)(Request::of(
                 $url,
-                Method::get(),
-                new ProtocolVersion(2, 0),
+                Method::get,
+                ProtocolVersion::v20,
                 Headers::of(
-                    new AuthToken($this->token),
+                    AuthToken::of($this->token),
                 ),
-            ));
+            ))->match(
+                static fn($success) => $success->response(),
+                static fn() => throw new \RuntimeException,
+            );
 
             /** @var array{tokens: list<array{id: string, user_id: string, creation_date: string, expires: string|null}>} */
             $body = Json::decode($response->body()->toString());
             $tokens = \array_merge($tokens, $body['tokens']);
-            $next = null;
 
-            if ($response->headers()->contains('Link')) {
-                /**
-                 * @psalm-suppress ArgumentTypeCoercion
-                 * @var Set<LinkValue>
-                 */
-                $next = $response
-                    ->headers()
-                    ->get('Link')
-                    ->values()
-                    ->filter(static function(LinkValue $link): bool {
-                        return $link->relationship() === 'next';
-                    });
-
-                if ($next->size() === 1) {
-                    $next = $url
-                        ->withPath(first($next)->url()->path())
-                        ->withQuery(first($next)->url()->query());
-                    $url = $next;
-                }
-            }
-        } while ($next instanceof Url);
+            $url = $response
+                ->headers()
+                ->find(Link::class)
+                ->flatMap(
+                    static fn($header) => $header
+                        ->values()
+                        ->keep(Instance::of(LinkValue::class))
+                        ->find(static fn($link) => $link->relationship() === 'next'),
+                )
+                ->map(
+                    static fn($link) => $url
+                        ->withPath($link->url()->path())
+                        ->withQuery($link->url()->query()),
+                )
+                ->match(
+                    static fn($next) => $next,
+                    static fn() => null,
+                );
+        } while ($url instanceof Url);
 
         /** @var Set<Token> */
-        $set = Set::of(Token::class);
-
-        foreach ($tokens as $token) {
-            $set = ($set)($this->decode($token));
-        }
-
-        return $set;
+        return Set::of(...$tokens)->map($this->decode(...));
     }
 
     public function get(Token\Id $id): Token
     {
-        $response = ($this->fulfill)(new Request(
+        $response = ($this->fulfill)(Request::of(
             Url::of("https://account.scaleway.com/tokens/{$id->toString()}"),
-            Method::get(),
-            new ProtocolVersion(2, 0),
+            Method::get,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
             ),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{token: array{id: string, user_id: string, creation_date: string, expires: string|null}} */
         $body = Json::decode($response->body()->toString());
@@ -111,14 +112,17 @@ final class Http implements Tokens
 
     public function remove(Token\Id $id): void
     {
-        ($this->fulfill)(new Request(
+        ($this->fulfill)(Request::of(
             Url::of("https://account.scaleway.com/tokens/{$id->toString()}"),
-            Method::delete(),
-            new ProtocolVersion(2, 0),
+            Method::delete,
+            ProtocolVersion::v20,
             Headers::of(
-                new AuthToken($this->token),
+                AuthToken::of($this->token),
             ),
-        ));
+        ))->match(
+            static fn() => null,
+            static fn() => throw new \RuntimeException,
+        );
     }
 
     /**
@@ -129,8 +133,16 @@ final class Http implements Tokens
         return new Token(
             new Token\Id($token['id']),
             new User\Id($token['user_id']),
-            $this->clock->at($token['creation_date']),
-            \is_string($token['expires']) ? $this->clock->at($token['expires']) : null,
+            $this->clock->at($token['creation_date'])->match(
+                static fn($point) => $point,
+                static fn() => throw new \RuntimeException,
+            ),
+            Maybe::of($token['expires'])
+                ->flatMap($this->clock->at(...))
+                ->match(
+                    static fn($point) => $point,
+                    static fn() => null,
+                ),
         );
     }
 }

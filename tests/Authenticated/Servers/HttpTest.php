@@ -13,20 +13,23 @@ use Innmind\ScalewaySdk\{
     Image,
     IP,
 };
-use Innmind\HttpTransport\Transport;
+use Innmind\HttpTransport\{
+    Transport,
+    Success,
+};
 use Innmind\Http\{
-    Message\Response,
+    Response,
+    Response\StatusCode,
     Headers,
     Header\Link,
     Header\LinkValue,
 };
+use Innmind\Filesystem\File\Content;
 use Innmind\Url\Url;
-use Innmind\Stream\Readable\Stream;
 use Innmind\Json\Json;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\{
-    unwrap,
-    first,
+use Innmind\Immutable\{
+    Set,
+    Either,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -54,11 +57,24 @@ class HttpTest extends TestCase
         $http
             ->expects($this->once())
             ->method('__invoke')
-            ->with($this->callback(static function($request): bool {
-                return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers' &&
-                    $request->method()->toString() === 'POST' &&
-                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
-                    $request->body()->toString() === Json::encode([
+            ->willReturnCallback(function($request) {
+                $this->assertSame(
+                    'https://cp-par1.scaleway.com/servers',
+                    $request->url()->toString(),
+                );
+                $this->assertSame(
+                    'POST',
+                    $request->method()->toString(),
+                );
+                $this->assertSame(
+                    'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20',
+                    $request->headers()->get('x-auth-token')->match(
+                        static fn($header) => $header->toString(),
+                        static fn() => null,
+                    ),
+                );
+                $this->assertSame(
+                    Json::encode([
                         'name' => 'foobar',
                         'organization' => '000a115d-2852-4b0a-9ce8-47f1134ba95a',
                         'image' => '9956c6a6-607c-4d42-92bc-5f51f7087ae4',
@@ -66,56 +82,59 @@ class HttpTest extends TestCase
                         'dynamic_ip_required' => false,
                         'enable_ipv6' => true,
                         'public_ip' => '95be217a-c32f-41c1-b62d-97827adfc9e5',
-                    ]);
-            }))
-            ->willReturn($response = $this->createMock(Response::class));
-        $response
-            ->expects($this->once())
-            ->method('body')
-            ->willReturn(Stream::ofContent(<<<JSON
-{
-    "server": {
-        "bootscript": null,
-        "dynamic_ip_required": true,
-        "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
-        "image": {
-            "id": "9956c6a6-607c-4d42-92bc-5f51f7087ae4",
-            "name": "ubuntu working"
-        },
-        "name": "foobar",
-        "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
-        "private_ip": null,
-        "public_ip": {
-            "id": "95be217a-c32f-41c1-b62d-97827adfc9e5"
-        },
-        "enable_ipv6": true,
-        "state": "stopped",
-        "ipv6": null,
-        "commercial_type": "START1-S",
-        "arch": "x86_64",
-        "boot_type": "local",
-        "tags": [
-            "foo",
-            "bar"
-        ],
-        "volumes": {
-            "0": {
-                "export_uri": null,
-                "id": "d9257116-6919-49b4-a420-dcfdff51fcb1",
-                "name": "vol simple snapshot",
-                "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
-                "server": {
-                    "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
-                    "name": "foobar"
-                },
-                "size": 10000000000,
-                "volume_type": "l_ssd"
-            }
-        }
-    }
-}
-JSON
-            ));
+                    ]),
+                    $request->body()->toString(),
+                );
+
+                return Either::right(new Success($request, Response::of(
+                    StatusCode::ok,
+                    $request->protocolVersion(),
+                    null,
+                    Content::ofString(<<<JSON
+                    {
+                        "server": {
+                            "bootscript": null,
+                            "dynamic_ip_required": true,
+                            "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
+                            "image": {
+                                "id": "9956c6a6-607c-4d42-92bc-5f51f7087ae4",
+                                "name": "ubuntu working"
+                            },
+                            "name": "foobar",
+                            "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+                            "private_ip": null,
+                            "public_ip": {
+                                "id": "95be217a-c32f-41c1-b62d-97827adfc9e5"
+                            },
+                            "enable_ipv6": true,
+                            "state": "stopped",
+                            "ipv6": null,
+                            "commercial_type": "START1-S",
+                            "arch": "x86_64",
+                            "boot_type": "local",
+                            "tags": [
+                                "foo",
+                                "bar"
+                            ],
+                            "volumes": {
+                                "0": {
+                                    "export_uri": null,
+                                    "id": "d9257116-6919-49b4-a420-dcfdff51fcb1",
+                                    "name": "vol simple snapshot",
+                                    "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+                                    "server": {
+                                        "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
+                                        "name": "foobar"
+                                    },
+                                    "size": 10000000000,
+                                    "volume_type": "l_ssd"
+                                }
+                            }
+                        }
+                    }
+                    JSON),
+                )));
+            });
 
         $server = $servers->create(
             new Server\Name('foobar'),
@@ -133,8 +152,11 @@ JSON
         $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', $server->image()->toString());
         $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', $server->ip()->toString());
         $this->assertSame(Server\State::stopped(), $server->state());
-        $this->assertSame(['foo', 'bar'], unwrap($server->tags()));
-        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', first($server->volumes())->toString());
+        $this->assertSame(['foo', 'bar'], $server->tags()->toList());
+        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', $server->volumes()->match(
+            static fn($volume) => $volume->toString(),
+            static fn() => null,
+        ));
     }
 
     public function testList()
@@ -145,139 +167,141 @@ JSON
             new Token\Id('9de8f869-c58e-4aa3-9208-2d4eaff5fa20'),
         );
         $http
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('__invoke')
-            ->withConsecutive(
-                [$this->callback(static function($request): bool {
-                    return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers' &&
-                        $request->method()->toString() === 'GET' &&
-                        $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
-                })],
-                [$this->callback(static function($request): bool {
-                    return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers?page=2&per_page=50' &&
-                        $request->method()->toString() === 'GET' &&
-                        $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
-                })],
-            )
-            ->will($this->onConsecutiveCalls(
-                $response1 = $this->createMock(Response::class),
-                $response2 = $this->createMock(Response::class),
-            ));
-        $response1
-            ->expects($this->any())
-            ->method('headers')
-            ->willReturn(Headers::of(
-                new Link(
-                    new LinkValue(Url::of('/servers?page=2&per_page=50'), 'next'),
-                ),
-            ));
-        $response1
-            ->expects($this->once())
-            ->method('body')
-            ->willReturn(Stream::ofContent(<<<JSON
-{
-    "servers": [
-        {
-            "bootscript": null,
-            "dynamic_ip_required": true,
-            "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
-            "image": {
-                "id": "9956c6a6-607c-4d42-92bc-5f51f7087ae4",
-                "name": "ubuntu working"
-            },
-            "name": "foobar",
-            "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
-            "private_ip": null,
-            "public_ip": {
-                "id": "95be217a-c32f-41c1-b62d-97827adfc9e5"
-            },
-            "enable_ipv6": true,
-            "state": "stopped",
-            "ipv6": null,
-            "commercial_type": "START1-S",
-            "arch": "x86_64",
-            "boot_type": "local",
-            "tags": [
-                "foo",
-                "bar"
-            ],
-            "volumes": {
-                "0": {
-                    "export_uri": null,
-                    "id": "d9257116-6919-49b4-a420-dcfdff51fcb1",
-                    "name": "vol simple snapshot",
-                    "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
-                    "server": {
-                        "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
-                        "name": "foobar"
-                    },
-                    "size": 10000000000,
-                    "volume_type": "l_ssd"
-                }
-            }
-        }
-    ]
-}
-JSON
-            ));
-        $response2
-            ->expects($this->once())
-            ->method('headers')
-            ->willReturn(Headers::of());
-        $response2
-            ->expects($this->once())
-            ->method('body')
-            ->willReturn(Stream::ofContent(<<<JSON
-{
-    "servers": [
-        {
-            "bootscript": null,
-            "dynamic_ip_required": true,
-            "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
-            "image": {
-                "id": "9956c6a6-607c-4d42-92bc-5f51f7087ae4",
-                "name": "ubuntu working"
-            },
-            "name": "foobar",
-            "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
-            "private_ip": null,
-            "public_ip": {
-                "id": "95be217a-c32f-41c1-b62d-97827adfc9e5"
-            },
-            "enable_ipv6": true,
-            "state": "stopped",
-            "ipv6": null,
-            "commercial_type": "START1-S",
-            "arch": "x86_64",
-            "boot_type": "local",
-            "tags": [
-                "foo",
-                "bar"
-            ],
-            "volumes": {
-                "0": {
-                    "export_uri": null,
-                    "id": "d9257116-6919-49b4-a420-dcfdff51fcb1",
-                    "name": "vol simple snapshot",
-                    "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
-                    "server": {
-                        "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
-                        "name": "foobar"
-                    },
-                    "size": 10000000000,
-                    "volume_type": "l_ssd"
-                }
-            }
-        }
-    ]
-}
-JSON
-            ));
+            ->willReturnCallback(function($request) use ($matcher) {
+                $this->assertSame(
+                    'GET',
+                    $request->method()->toString(),
+                );
+                $this->assertSame(
+                    'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20',
+                    $request->headers()->get('x-auth-token')->match(
+                        static fn($header) => $header->toString(),
+                        static fn() => null,
+                    ),
+                );
+
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame(
+                        'https://cp-par1.scaleway.com/servers',
+                        $request->url()->toString(),
+                    ),
+                    2 => $this->assertSame(
+                        'https://cp-par1.scaleway.com/servers?page=2&per_page=50',
+                        $request->url()->toString(),
+                    ),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => Either::right(new Success($request, Response::of(
+                        StatusCode::ok,
+                        $request->protocolVersion(),
+                        Headers::of(new Link(
+                            new LinkValue(Url::of('/servers?page=2&per_page=50'), 'next'),
+                        )),
+                        Content::ofString(<<<JSON
+                        {
+                            "servers": [
+                                {
+                                    "bootscript": null,
+                                    "dynamic_ip_required": true,
+                                    "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
+                                    "image": {
+                                        "id": "9956c6a6-607c-4d42-92bc-5f51f7087ae4",
+                                        "name": "ubuntu working"
+                                    },
+                                    "name": "foobar",
+                                    "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+                                    "private_ip": null,
+                                    "public_ip": {
+                                        "id": "95be217a-c32f-41c1-b62d-97827adfc9e5"
+                                    },
+                                    "enable_ipv6": true,
+                                    "state": "stopped",
+                                    "ipv6": null,
+                                    "commercial_type": "START1-S",
+                                    "arch": "x86_64",
+                                    "boot_type": "local",
+                                    "tags": [
+                                        "foo",
+                                        "bar"
+                                    ],
+                                    "volumes": {
+                                        "0": {
+                                            "export_uri": null,
+                                            "id": "d9257116-6919-49b4-a420-dcfdff51fcb1",
+                                            "name": "vol simple snapshot",
+                                            "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+                                            "server": {
+                                                "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
+                                                "name": "foobar"
+                                            },
+                                            "size": 10000000000,
+                                            "volume_type": "l_ssd"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                        JSON),
+                    ))),
+                    2 => Either::right(new Success($request, Response::of(
+                        StatusCode::ok,
+                        $request->protocolVersion(),
+                        null,
+                        Content::ofString(<<<JSON
+                        {
+                            "servers": [
+                                {
+                                    "bootscript": null,
+                                    "dynamic_ip_required": true,
+                                    "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8d",
+                                    "image": {
+                                        "id": "9956c6a6-607c-4d42-92bc-5f51f7087ae4",
+                                        "name": "ubuntu working"
+                                    },
+                                    "name": "foobar",
+                                    "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+                                    "private_ip": null,
+                                    "public_ip": {
+                                        "id": "95be217a-c32f-41c1-b62d-97827adfc9e5"
+                                    },
+                                    "enable_ipv6": true,
+                                    "state": "stopped",
+                                    "ipv6": null,
+                                    "commercial_type": "START1-S",
+                                    "arch": "x86_64",
+                                    "boot_type": "local",
+                                    "tags": [
+                                        "foo",
+                                        "bar"
+                                    ],
+                                    "volumes": {
+                                        "0": {
+                                            "export_uri": null,
+                                            "id": "d9257116-6919-49b4-a420-dcfdff51fcb1",
+                                            "name": "vol simple snapshot",
+                                            "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+                                            "server": {
+                                                "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
+                                                "name": "foobar"
+                                            },
+                                            "size": 10000000000,
+                                            "volume_type": "l_ssd"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                        JSON),
+                    ))),
+                };
+            });
 
         $servers = $servers->list();
 
         $this->assertInstanceOf(Set::class, $servers);
-        $this->assertSame(Server::class, (string) $servers->type());
         $this->assertCount(2, $servers);
     }
 
@@ -291,62 +315,75 @@ JSON
         $http
             ->expects($this->once())
             ->method('__invoke')
-            ->with($this->callback(static function($request): bool {
-                return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers/3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c' &&
-                    $request->method()->toString() === 'GET' &&
-                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
-            }))
-            ->willReturn($response = $this->createMock(Response::class));
-        $response
-            ->expects($this->once())
-            ->method('body')
-            ->willReturn(Stream::ofContent(<<<JSON
-{
-    "server": {
-        "bootscript": null,
-        "dynamic_ip_required": true,
-        "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
-        "image": {
-            "id": "9956c6a6-607c-4d42-92bc-5f51f7087ae4",
-            "name": "ubuntu working"
-        },
-        "name": "foobar",
-        "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
-        "private_ip": null,
-        "public_ip": {
-            "id": "95be217a-c32f-41c1-b62d-97827adfc9e5"
-        },
-        "enable_ipv6": true,
-        "state": "stopped",
-        "ipv6": null,
-        "commercial_type": "START1-S",
-        "arch": "x86_64",
-        "boot_type": "local",
-        "tags": [
-            "foo",
-            "bar"
-        ],
-        "volumes": {
-            "0": {
-                "export_uri": null,
-                "id": "d9257116-6919-49b4-a420-dcfdff51fcb1",
-                "name": "vol simple snapshot",
-                "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
-                "server": {
-                    "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
-                    "name": "foobar"
-                },
-                "size": 10000000000,
-                "volume_type": "l_ssd"
-            }
-        },
-        "allowed_actions": [
-            "backup"
-        ]
-    }
-}
-JSON
-            ));
+            ->willReturnCallback(function($request) {
+                $this->assertSame(
+                    'https://cp-par1.scaleway.com/servers/3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c',
+                    $request->url()->toString(),
+                );
+                $this->assertSame(
+                    'GET',
+                    $request->method()->toString(),
+                );
+                $this->assertSame(
+                    'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20',
+                    $request->headers()->get('x-auth-token')->match(
+                        static fn($header) => $header->toString(),
+                        static fn() => null,
+                    ),
+                );
+
+                return Either::right(new Success($request, Response::of(
+                    StatusCode::ok,
+                    $request->protocolVersion(),
+                    null,
+                    Content::ofString(<<<JSON
+                    {
+                        "server": {
+                            "bootscript": null,
+                            "dynamic_ip_required": true,
+                            "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
+                            "image": {
+                                "id": "9956c6a6-607c-4d42-92bc-5f51f7087ae4",
+                                "name": "ubuntu working"
+                            },
+                            "name": "foobar",
+                            "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+                            "private_ip": null,
+                            "public_ip": {
+                                "id": "95be217a-c32f-41c1-b62d-97827adfc9e5"
+                            },
+                            "enable_ipv6": true,
+                            "state": "stopped",
+                            "ipv6": null,
+                            "commercial_type": "START1-S",
+                            "arch": "x86_64",
+                            "boot_type": "local",
+                            "tags": [
+                                "foo",
+                                "bar"
+                            ],
+                            "volumes": {
+                                "0": {
+                                    "export_uri": null,
+                                    "id": "d9257116-6919-49b4-a420-dcfdff51fcb1",
+                                    "name": "vol simple snapshot",
+                                    "organization": "000a115d-2852-4b0a-9ce8-47f1134ba95a",
+                                    "server": {
+                                        "id": "3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c",
+                                        "name": "foobar"
+                                    },
+                                    "size": 10000000000,
+                                    "volume_type": "l_ssd"
+                                }
+                            },
+                            "allowed_actions": [
+                                "backup"
+                            ]
+                        }
+                    }
+                    JSON),
+                )));
+            });
 
         $server = $servers->get(new Server\Id('3cb18e2d-f4f7-48f7-b452-59b88ae8fc8c'));
 
@@ -357,11 +394,14 @@ JSON
         $this->assertSame('9956c6a6-607c-4d42-92bc-5f51f7087ae4', $server->image()->toString());
         $this->assertSame('95be217a-c32f-41c1-b62d-97827adfc9e5', $server->ip()->toString());
         $this->assertSame(Server\State::stopped(), $server->state());
-        $this->assertSame(['foo', 'bar'], unwrap($server->tags()));
-        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', first($server->volumes())->toString());
+        $this->assertSame(['foo', 'bar'], $server->tags()->toList());
+        $this->assertSame('d9257116-6919-49b4-a420-dcfdff51fcb1', $server->volumes()->match(
+            static fn($volume) => $volume->toString(),
+            static fn() => null,
+        ));
         $this->assertSame(
             [Server\Action::backup()],
-            unwrap($server->allowedActions()),
+            $server->allowedActions()->toList(),
         );
     }
 
@@ -375,11 +415,28 @@ JSON
         $http
             ->expects($this->once())
             ->method('__invoke')
-            ->with($this->callback(static function($request): bool {
-                return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd' &&
-                    $request->method()->toString() === 'DELETE' &&
-                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20';
-            }));
+            ->willReturnCallback(function($request) {
+                $this->assertSame(
+                    'https://cp-par1.scaleway.com/servers/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd',
+                    $request->url()->toString(),
+                );
+                $this->assertSame(
+                    'DELETE',
+                    $request->method()->toString(),
+                );
+                $this->assertSame(
+                    'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20',
+                    $request->headers()->get('x-auth-token')->match(
+                        static fn($header) => $header->toString(),
+                        static fn() => null,
+                    ),
+                );
+
+                return Either::right(new Success($request, Response::of(
+                    StatusCode::ok,
+                    $request->protocolVersion(),
+                )));
+            });
 
         $this->assertNull($servers->remove(new Server\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd')));
     }
@@ -394,12 +451,32 @@ JSON
         $http
             ->expects($this->once())
             ->method('__invoke')
-            ->with($this->callback(static function($request): bool {
-                return $request->url()->toString() === 'https://cp-par1.scaleway.com/servers/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd/action' &&
-                    $request->method()->toString() === 'POST' &&
-                    $request->headers()->get('x-auth-token')->toString() === 'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20' &&
-                    $request->body()->toString() === '{"action":"poweroff"}';
-            }));
+            ->willReturnCallback(function($request) {
+                $this->assertSame(
+                    'https://cp-par1.scaleway.com/servers/c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd/action',
+                    $request->url()->toString(),
+                );
+                $this->assertSame(
+                    'POST',
+                    $request->method()->toString(),
+                );
+                $this->assertSame(
+                    'X-Auth-Token: 9de8f869-c58e-4aa3-9208-2d4eaff5fa20',
+                    $request->headers()->get('x-auth-token')->match(
+                        static fn($header) => $header->toString(),
+                        static fn() => null,
+                    ),
+                );
+                $this->assertSame(
+                    '{"action":"poweroff"}',
+                    $request->body()->toString(),
+                );
+
+                return Either::right(new Success($request, Response::of(
+                    StatusCode::ok,
+                    $request->protocolVersion(),
+                )));
+            });
 
         $this->assertNull($servers->execute(
             new Server\Id('c675f420-cfeb-48ff-ba2a-9d2a4dbe3fcd'),
